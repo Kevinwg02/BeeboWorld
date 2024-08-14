@@ -1,0 +1,28 @@
+.booksection {
+    margin: 5%;
+}
+
+.couverture {
+    width: 35%;
+    display: inline;
+    grid-row: span 2;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.bookgrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: center;
+    text-align: justify;
+}
+
+.titlebook {
+    grid-column: 2;
+}
+
+.bookdescription {
+
+    grid-column: span 2;
+}
+
