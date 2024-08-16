@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="css/themes.css">
   <link rel="stylesheet" href="css/menu.css">
   <link rel="stylesheet" href="css/bookcard.css">
+  <link rel="stylesheet" href="css/medaillelist.css">
 </head>
 
 <body>
@@ -29,6 +30,20 @@
     </div>
   </section>
   <section class="booksection">
+      <input autocomplete="off" role="combobox" list="" id="input" name="medaille"
+        placeholder="choix de la médaille">
+      <datalist id="medaille" role="listbox">
+        <option value="Or">Or</option>
+        <option value="Argent">Argent</option>
+        <option value="Bronze">Bronze</option>
+        <option value="Diamant">Diamant</option>
+        <option value="PAL">PAL</option>
+        <option value="Corbeille">Corbeille</option>
+        <option value="Envie">Envie</option>
+        <option value="Lu">Lu</option>
+      </datalist>
+
+
     <div class="book">
       <div class="bookgrid">
         <img class="couverture" src="assets/images/couvertures/TheAdventureOfBeebo.jpg" alt="" srcset="">
@@ -38,11 +53,48 @@
           necessitatibus porro, nihil sint corporis sit commodi non qui fuga facilis omnis. Omnis, illum quia architecto
           facere at rem ab hic dolor consequuntur. Eaque, suscipit.</p>
       </div>
-      <p class="nbpages">Page: 250</p>
-      <p class="booktype">Romance</p>
-      <p class="bookgenre">Hardback</p>
+
+      <div class="infoplus">
+        <p class="nbpages">250 Pages</p>
+        <p class="bookgenre">Romance</p>
+        <p class="booktype">Hardback</p>
+      </div>
     </div>
+    <div class="book">
+      <div class="bookgrid">
+        <img class="couverture" src="assets/images/couvertures/TheAdventureOfBeebo.jpg" alt="" srcset="">
+        <h3 class="titlebook">The Adventure of Beebo</h3>
+        <p class="bookdescription">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Minus totam dolorum
+          expedita distinctio libero quas cupiditate officiis ipsum animi corrupti laboriosam voluptas eos esse dicta
+          necessitatibus porro, nihil sint corporis sit commodi non qui fuga facilis omnis. Omnis, illum quia architecto
+          facere at rem ab hic dolor consequuntur. Eaque, suscipit.</p>
+      </div>
+
+      <div class="infoplus">
+        <p class="nbpages">250 Pages</p>
+        <p class="bookgenre">Romance</p>
+        <p class="booktype">Hardback</p>
+      </div>
+    </div>
+    <div class="book">
+      <div class="bookgrid">
+        <img class="couverture" src="assets/images/couvertures/TheAdventureOfBeebo.jpg" alt="" srcset="">
+        <h3 class="titlebook">The Adventure of Beebo</h3>
+        <p class="bookdescription">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Minus totam dolorum
+          expedita distinctio libero quas cupiditate officiis ipsum animi corrupti laboriosam voluptas eos esse dicta
+          necessitatibus porro, nihil sint corporis sit commodi non qui fuga facilis omnis. Omnis, illum quia architecto
+          facere at rem ab hic dolor consequuntur. Eaque, suscipit.</p>
+      </div>
+
+      <div class="infoplus">
+        <p class="nbpages">250 Pages</p>
+        <p class="bookgenre">Romance</p>
+        <p class="booktype">Hardback</p>
+      </div>
+    </div>
+    <script src="js/medaillelist.js"></script>
   </section>
+
 </body>
 
 </html>
