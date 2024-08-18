@@ -1,0 +1,29 @@
+.booksection, .books {
+    margin: 5%;
+}
+
+
+.booksection input{
+    padding: 5px 25px;
+    text-align: center;
+
+}
+
+.couverture {
+    width: 50%;
+    display: inline;
+    grid-row: span 2;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.bookgrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    align-items: center;
+    text-align: justify;
+    gap: 2rem;
+}
+.book{
+    color: white;
+}

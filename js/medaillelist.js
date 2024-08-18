@@ -1,5 +1,6 @@
 input.onfocus = function () {
   medaille.style.display = 'block';
+  medaille.style.color = 'var(--main-color)';
   input.style.borderRadius = "5px 5px 0 0";  
 };
 for (let option of medaille.options) {
