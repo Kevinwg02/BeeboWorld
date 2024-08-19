@@ -19,11 +19,11 @@
 
 .bookgrid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     align-items: center;
     text-align: justify;
     gap: 2rem;
 }
 .book{
-    color: white;
+    color: rgb(0, 0, 0);
 }
