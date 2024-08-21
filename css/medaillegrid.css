@@ -2,28 +2,43 @@
     margin: 5%;
 }
 
-
-.booksection input{
+.booksection input {
     padding: 5px 25px;
-    text-align: center;
-
 }
 
 .couverture {
-    width: 50%;
-    display: inline;
-    grid-row: span 2;
-    margin-left: auto;
-    margin-right: auto;
+    width: 100%;
+    height: auto;
 }
 
 .bookgrid {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    align-items: center;
-    text-align: justify;
+    grid-template-columns: repeat(6, 1fr); /* 6 columns */
+    grid-template-rows: repeat(2, auto); /* 2 rows */
     gap: 2rem;
 }
-.book{
-    color: rgb(0, 0, 0);
+
+.userschoice {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    text-align: center;
 }
+
+.books {
+    overflow-x: auto;
+    white-space: nowrap;
+    background-color: var(--main-color);
+    padding: 15px;
+    border-radius: 15px;
+}
+
+.books > .bookgrid {
+    display: grid;
+    grid-auto-flow: column; /* Flow the grid items in columns */
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Ensures it fills the container */
+    grid-template-rows: repeat(2, auto); /* Exactly 2 rows */
+    gap: 2rem;
+    width: max-content; /* Ensures that the grid width is as wide as its content */
+}
+
+
