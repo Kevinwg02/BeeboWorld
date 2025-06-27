@@ -5,11 +5,15 @@
     background-color: var(--main-color);
     /* text-align: center; */
     z-index: 1;
+
+    transition: ease-in-out 1ms;
+    transform: translateX(50%);
+    transform: translateY(0px);
 }
 
 .menu a:hover {
     background: var(--first-color);
-    padding: 1.6% 2%;
+    padding: 1.5% 2%;
     color: black;
 }
 
@@ -17,7 +21,7 @@
     color:  var(--first-color);
     text-align: center;
     text-decoration: none;
-    padding-left: 2%;
+    padding-left: 0%;
     padding-right: 2%;
 }
 

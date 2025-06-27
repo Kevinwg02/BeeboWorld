@@ -2,20 +2,6 @@
     margin: 5%;
 }
 
-
-.book{
-    border-radius: 15px;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 5%;
-    background-color: var(--main-color);
-}
-.booksection input{
-    padding: 5px 25px;
-    text-align: center;
-    border-radius: 5px ;
-}
-
 .couverture {
     width: 35%;
     display: inline;
@@ -40,17 +26,3 @@
     grid-column: span 2;
 }
 
-.infoplus {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    text-align: center;
-    font-size: 11px;
-}
-
-.nbpages {
-    grid-column: 2;
-}
-
-.booktype {
-    grid-row: 1;
-}
