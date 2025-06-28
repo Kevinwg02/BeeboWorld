@@ -18,7 +18,7 @@ try {
     } elseif ($mois) {
         $stmt = $pdo->prepare("
             SELECT * FROM library 
-            WHERE (DATE_FORMAT(Date_achat, '%Y-%m') = :mois OR DATE_FORMAT(Date_lecture, '%Y-%m') = :mois)
+            WHERE (DATE_FORMAT(Date_achat, '%Y-%m') = :mois OR DATE_FORMAT(Date_lecture, '%m-%Y') = :mois)
             ORDER BY Date_achat, Date_lecture
         ");
         $stmt->execute(['mois' => $mois]);

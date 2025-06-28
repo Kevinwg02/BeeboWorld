@@ -29,9 +29,10 @@ if (!$book) {
     <title><?= htmlspecialchars($book['Titre']) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        img{
+        img {
             width: 70%;
         }
+
         .label {
             font-weight: bold;
             color: #333;
@@ -58,8 +59,8 @@ if (!$book) {
 
 <body class="bg-light">
     <div class="container py-4">
-            <a href="../index.php" class="btn btn-warning mb-3">📚 Library</a>
-    <a href="add_manual.php" class="btn btn-primary mb-3">➕ Ajout manuel</a>
+        <a href="../index.php" class="btn btn-warning mb-3">📚 Library</a>
+        <a href="add_manual.php" class="btn btn-primary mb-3">➕ Ajout manuel</a>
         <h1 class="mb-4"><?= htmlspecialchars($book['Titre']) ?></h1>
         <div class="row">
             <!-- Couverture -->
@@ -75,17 +76,42 @@ if (!$book) {
                 <div class="row">
                     <?php
                     $fields = [
-                        "Auteur", "ISBN", "Date_achat", "Prix",   "Date_lecture", "Dedicace","Maison_edition", "Goodies", "Format", "Marquepages","Chronique_ecrite", "Chronique_publiee",
-                         "Nombre_pages", "Relecture", "Genre", "Notation",  "Couple", "Themes"
+                        "Auteur",
+                        "ISBN",
+                        "Date_achat",
+                        "Prix",
+                        "Date_lecture",
+                        "Dedicace",
+                        "Maison_edition",
+                        "Goodies",
+                        "Format",
+                        "Marquepages",
+                        "Chronique_ecrite",
+                        "Chronique_publiee",
+                        "Nombre_pages",
+                        "Relecture",
+                        "Genre",
+                        "Notation",
+                        "Couple",
+                        "Themes"
                     ];
                     foreach ($fields as $field):
                         $value = $book[$field] ?? '';
-                        ?>
+
+                        // Reformater la date au format français uniquement pour les champs de date
+                        if (in_array($field, ['Date_achat', 'Date_lecture', 'Relecture']) && !empty($value) && $value !== '0000-00-00') {
+                            $date = DateTime::createFromFormat('Y-m-d', $value);
+                            if ($date) {
+                                $value = $date->format('d-m-Y'); // format JJ-MM-AAAA
+                            }
+                        }
+                    ?>
                         <div class="col-md-6 detail-row">
                             <span class="label"><?= htmlspecialchars($field) ?> :</span><br>
                             <span class="value"><?= nl2br(htmlspecialchars($value)) ?></span>
                         </div>
                     <?php endforeach; ?>
+
                 </div>
 
                 <!-- Actions -->
