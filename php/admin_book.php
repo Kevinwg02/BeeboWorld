@@ -13,7 +13,7 @@ if (isset($_GET['delete'])) {
 $search = $_GET['search'] ?? '';
 $genreFilter = $_GET['genre'] ?? '';
 $notationFilter = $_GET['notation'] ?? '';  // <-- nouveau filtre
-$formatFilter = $_GET['notation'] ?? '';  // <-- nouveau filtre
+$formatFilter = $_GET['format'] ?? '';  // <-- nouveau filtre
 
 $whereClauses = [];
 $params = [];
