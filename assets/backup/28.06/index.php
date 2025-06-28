@@ -6,67 +6,6 @@ $book = null;
 $message = '';
 $added = false;
 
-// Statistiques globales
-try {
-    // Total de livres
-    $stmt = $pdo->query("SELECT COUNT(*) FROM library");
-    $total_livres = $stmt->fetchColumn();
-
-    // Total de lectures
-    $stmt = $pdo->query("SELECT COUNT(*) FROM library WHERE Date_lecture IS NOT NULL AND Date_lecture != ''");
-    $total_lectures = $stmt->fetchColumn();
-
-    // Sur les 30 derniers jours
-    $stmt = $pdo->query("SELECT COUNT(*) FROM library WHERE Date_achat >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)");
-    $livres_30j = $stmt->fetchColumn();
-
-    $stmt = $pdo->query("SELECT COUNT(*) FROM library WHERE Date_lecture >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)");
-    $lectures_30j = $stmt->fetchColumn();
-} catch (PDOException $e) {
-    $stats_error = "Erreur lors de la récupération des statistiques : " . $e->getMessage();
-}
-
-// Préparation des données pour le graphique (depuis la date la plus ancienne)
-try {
-    // Ajouts mensuels depuis le début
-    $stmt = $pdo->query("
-        SELECT 
-            DATE_FORMAT(Date_achat, '%Y-%m') AS mois,
-            COUNT(*) AS nb_ajouts
-        FROM library
-        WHERE Date_achat IS NOT NULL
-        GROUP BY mois
-        ORDER BY mois ASC
-    ");
-    $ajouts = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
-
-    // Lectures mensuelles depuis le début
-    $stmt = $pdo->query("
-        SELECT 
-            DATE_FORMAT(Date_lecture, '%Y-%m') AS mois,
-            COUNT(*) AS nb_lectures
-        FROM library
-        WHERE Date_lecture IS NOT NULL
-        GROUP BY mois
-        ORDER BY mois ASC
-    ");
-    $lectures = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
-
-    // Fusionner les mois des deux jeux de données
-    $mois = array_unique(array_merge(array_keys($ajouts), array_keys($lectures)));
-    sort($mois);
-
-    $data_ajouts = [];
-    $data_lectures = [];
-
-    foreach ($mois as $m) {
-        $data_ajouts[] = $ajouts[$m] ?? 0;
-        $data_lectures[] = $lectures[$m] ?? 0;
-    }
-} catch (PDOException $e) {
-    $chart_error = "Erreur graphique : " . $e->getMessage();
-}
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($isbn)) {
     $isbn = trim($isbn);
     $api_url = "https://www.googleapis.com/books/v1/volumes?q=isbn:" . urlencode($isbn);
@@ -145,18 +84,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 <body class="bg-light">
 
     <div class="container py-5">
-        <h1 class="mb-3">Bibliothèque BeeboWorld</h1>
+        <h1 class="mb-4">Bibliothèque BeeboWorld</h1>
 
-        <div class="d-flex flex-wrap align-items-center gap-2 mb-4">
-            <form method="POST" class="d-flex align-items-center" style="gap: 0.5rem;">
+        <form method="POST" class="row g-3 align-items-center mb-4">
+            <div class="col-auto">
                 <input type="text" name="isbn" class="form-control" placeholder="Entrez un ISBN" required
-                    value="<?= htmlspecialchars($isbn) ?>" />
-                <button type="submit" name="action" value="find" class="btn btn-info">Recherche</button>
-            </form>
-            <a href="/php/admin_book.php" class="btn btn-success">Admin</a>
-            <a href="php/library.php" class="btn btn-primary">Library</a>
-            <a href="/php/add_manual.php" class="btn btn-warning">+ Ajout manuel</a>
-        </div>
+                    value="<?= htmlspecialchars($isbn) ?>">
+            </div>
+            <div class="col-auto">
+                <button type="submit" name="action" value="find" class="btn btn-info">Trouver le livre</button>
+            </div>
+        </form>
+
+        <a href="/php/admin_book.php" class="btn btn-success mb-4"> Admin</a>
+        <a href="php/library.php" class="btn btn-primary mb-4">Library</a>
+        <a href="/php/add_manual.php" class="btn btn-warning mb-4">+ Ajout manuel</a>
+
 
         <?php if ($message) : ?>
             <div class="alert <?= $added ? 'alert-success' : 'alert-danger' ?>"><?= htmlspecialchars($message) ?></div>
@@ -172,6 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 <div class="row g-3">
                     <input type="hidden" name="isbn" value="<?= htmlspecialchars($isbn) ?>">
                     <input type="hidden" name="couverture" value="<?= htmlspecialchars($couverture) ?>">
+
 
                     <div class="col-md-6">
                         <label class="form-label">Auteur</label>
@@ -254,99 +198,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     </div>
 
                     <div class="col-12 text-end">
-                        <button type="submit" class="btn btn-primary">Ajouter</button>
+                        <button type="submit" class="btn btn-primary">✅ Confirmer et ajouter à la bibliothèque</button>
                     </div>
                 </div>
             </form>
         <?php endif; ?>
 
-        <?php if (isset($stats_error)) : ?>
-            <div class="alert alert-danger"><?= htmlspecialchars($stats_error) ?></div>
-        <?php else : ?>
-            <div class="row my-5">
-                <div class="col-md-3">
-                    <div class="card shadow-sm p-3 text-center bg-light">
-                        <h5>Total livres</h5>
-                        <h2><?= $total_livres ?></h2>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card shadow-sm p-3 text-center bg-light">
-                        <h5>Total lectures</h5>
-                        <h2><?= $total_lectures ?></h2>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card shadow-sm p-3 text-center bg-light">
-                        <h5>Ajouts 30 derniers jours</h5>
-                        <h2><?= $livres_30j ?></h2>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card shadow-sm p-3 text-center bg-light">
-                        <h5>Lectures 30 derniers jours</h5>
-                        <h2><?= $lectures_30j ?></h2>
-                    </div>
-                </div>
-            </div>
-        <?php endif; ?>
-
-        <?php if (isset($chart_error)) : ?>
-            <div class="alert alert-danger"><?= htmlspecialchars($chart_error) ?></div>
-        <?php else : ?>
-            <div class="card p-4 shadow-sm">
-                <h5 class="mb-3">📊 Évolution des ajouts et lectures (depuis la création)</h5>
-                <canvas id="chartEvolution"></canvas>
-            </div>
-        <?php endif; ?>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        const ctx = document.getElementById('chartEvolution').getContext('2d');
-
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: <?= json_encode($mois ?? []) ?>,
-                datasets: [{
-                    label: 'Ajouts',
-                    data: <?= json_encode($data_ajouts ?? []) ?>,
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    fill: true,
-                    tension: 0.3,
-                }, {
-                    label: 'Lectures',
-                    data: <?= json_encode($data_lectures ?? []) ?>,
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    fill: true,
-                    tension: 0.3,
-                }]
-            },
-            options: {
-                responsive: true,
-                interaction: {
-                    mode: 'index',
-                    intersect: false,
-                },
-                stacked: false,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Évolution des ajouts et lectures (depuis la création)'
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        precision: 0
-                    }
-                }
-            }
-        });
-    </script>
 </body>
 
 </html>
