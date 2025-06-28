@@ -10,27 +10,37 @@ $sql = "SELECT ID, ISBN, Couverture FROM library WHERE (Couverture IS NULL OR Co
 $stmt = $pdo->query($sql);
 $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Empiriquement, les images vides ont souvent ce hash (à vérifier sur ton système)
+$knownEmptyHash = 'd41d8cd98f00b204e9800998ecf8427e';  // hash vide
+
 foreach ($books as $book) {
     $isbn = preg_replace('/[^0-9Xx]/', '', $book['ISBN']);
-    $imgUrl = "https://covers.openlibrary.org/b/isbn/{$isbn}-L.jpg";
+    $imgUrl = "https://greenhousescribes.com/wp-content/uploads/2020/10/book-cover-generic.jpg";
     $localPath = "covers/{$isbn}.jpg";
     $savePath = __DIR__ . '/' . $localPath;
 
-    // Check if image exists on Open Library
+    // Vérifie si l’image existe
     $headers = @get_headers($imgUrl);
     if ($headers && strpos($headers[0], '200') !== false) {
-        // Download and save locally
-        file_put_contents($savePath, file_get_contents($imgUrl));
+        $imgData = file_get_contents($imgUrl);
+        $hash = md5($imgData);
 
-        // Update DB with local path
-        $update = $pdo->prepare("UPDATE library SET Couverture = :path WHERE ID = :id");
-        $update->execute([
-            'path' => $localPath,
-            'id' => $book['ID']
-        ]);
+        // Vérifie que ce n’est pas une image vide ou générique
+        if (strlen($imgData) > 500 && $hash !== $knownEmptyHash) {
+            file_put_contents($savePath, $imgData);
 
-        echo "✅ Image for ISBN {$isbn} saved and updated.\n";
+            // Mise à jour DB
+            $update = $pdo->prepare("UPDATE library SET Couverture = :path WHERE ID = :id");
+            $update->execute([
+                'path' => $localPath,
+                'id' => $book['ID']
+            ]);
+
+            echo "✅ Image pour ISBN {$isbn} enregistrée.\n";
+        } else {
+            echo "⚠️ Image générique ignorée pour ISBN {$isbn}.\n";
+        }
     } else {
-        echo "❌ No image found for ISBN {$isbn}.\n";
+        echo "❌ Aucune image trouvée pour ISBN {$isbn}.\n";
     }
 }

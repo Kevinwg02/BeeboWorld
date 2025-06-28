@@ -70,9 +70,9 @@ $format = $pdo->query("SELECT DISTINCT Format FROM library WHERE Format IS NOT N
 <body class="bg-light">
   <div class="container-fluid py-4">
     <h1 class="mb-4">📚 Administration complète des livres</h1>
-    <a href="../index.php" class="btn btn-primary mb-3">ISBN</a>
-    <a href="library.php" class="btn btn-primary mb-3">Library</a>
-    <a href="add_manual.php" class="btn btn-primary mb-3">+ Ajout manuel</a>
+    <a href="../index.php" class="btn btn-warning mb-3">📚 Library</a>
+    <a href="stats.php" class="btn btn-primary mb-3">📊 Stats</a>
+    <a href="add_manual.php" class="btn btn-success mb-3">➕ Ajout manuel</a>
 
     <form method="GET" class="row g-3 mb-4">
       <div class="col-md-3">
@@ -80,7 +80,7 @@ $format = $pdo->query("SELECT DISTINCT Format FROM library WHERE Format IS NOT N
       </div>
       <div class="col-md-3">
         <select name="genre" class="form-select">
-          <option value="">-- Tous les genres --</option>
+          <option value="">Tous les genres</option>
           <?php foreach ($genres as $genre): ?>
             <option value="<?= htmlspecialchars($genre) ?>" <?= $genreFilter === $genre ? 'selected' : '' ?>>
               <?= htmlspecialchars($genre) ?>
@@ -90,7 +90,7 @@ $format = $pdo->query("SELECT DISTINCT Format FROM library WHERE Format IS NOT N
       </div>
       <div class="col-md-3">
         <select name="notation" class="form-select">
-          <option value="">-- Toutes les médailles --</option>
+          <option value="">Toutes les médailles</option>
           <?php foreach ($notations as $notation): ?>
             <option value="<?= htmlspecialchars($notation) ?>" <?= $notationFilter === $notation ? 'selected' : '' ?>>
               <?= htmlspecialchars($notation) ?>
@@ -100,7 +100,7 @@ $format = $pdo->query("SELECT DISTINCT Format FROM library WHERE Format IS NOT N
       </div>
       <div class="col-md-3">
         <select name="format" class="form-select">
-          <option value="">-- Toutes les format --</option>
+          <option value="">Toutes les format</option>
           <?php foreach ($format as $format): ?>
             <option value="<?= htmlspecialchars($format) ?>" <?= $formatFilter === $format ? 'selected' : '' ?>>
               <?= htmlspecialchars($format) ?>

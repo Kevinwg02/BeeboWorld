@@ -19,10 +19,26 @@ if (!$book) {
 
 // Champs à gérer
 $fields = [
-    'Auteur', 'Titre', 'Dedicace', 'Marquepages', 'Goodies', 'ISBN',
-    'Format', 'Prix', 'Date_achat', 'Date_lecture', 'Relecture',
-    'Chronique_ecrite', 'Chronique_publiee', 'Details', 'Maison_edition',
-    'Nombre_pages', 'Notation', 'Genre', 'Couple', 'Couverture'
+    'Auteur',
+    'Titre',
+    'Dedicace',
+    'Marquepages',
+    'Goodies',
+    'ISBN',
+    'Format',
+    'Prix',
+    'Date_achat',
+    'Date_lecture',
+    'Relecture',
+    'Chronique_ecrite',
+    'Chronique_publiee',
+    'Details',
+    'Maison_edition',
+    'Nombre_pages',
+    'Notation',
+    'Genre',
+    'Couple',
+    'Couverture'
 ];
 
 // Charger notations existantes
@@ -61,7 +77,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Fonctions input
-function input($label, $name, $type = 'text', $size = 6) {
+function input($label, $name, $type = 'text', $size = 6)
+{
     global $book;
     $value = htmlspecialchars($book[$name] ?? '');
     echo "<div class='col-md-$size'>
@@ -70,7 +87,8 @@ function input($label, $name, $type = 'text', $size = 6) {
     </div>";
 }
 
-function textarea($label, $name, $rows = 3, $size = 12) {
+function textarea($label, $name, $rows = 3, $size = 12)
+{
     global $book;
     $value = htmlspecialchars($book[$name] ?? '');
     echo "<div class='col-md-$size'>
@@ -79,7 +97,8 @@ function textarea($label, $name, $rows = 3, $size = 12) {
     </div>";
 }
 
-function selectOuiNon($label, $name, $size = 6) {
+function selectOuiNon($label, $name, $size = 6)
+{
     global $book;
     $value = $book[$name] ?? '';
     echo "<div class='col-md-$size'>
@@ -92,7 +111,8 @@ function selectOuiNon($label, $name, $size = 6) {
     </div>";
 }
 
-function selectNotation($label, $name, $notations, $size = 6) {
+function selectNotation($label, $name, $notations, $size = 6)
+{
     global $book;
     $value = $book[$name] ?? '';
     echo "<div class='col-md-$size'>
@@ -109,52 +129,56 @@ function selectNotation($label, $name, $notations, $size = 6) {
 
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8" />
     <title>Modifier un livre</title>
     <link rel="shortcut icon" href="../assets/favicon.ico" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" />
 </head>
+
 <body class="bg-light">
-<div class="container py-5">
-    <h1 class="mb-4">✏️ Modifier un livre</h1>
+    <div class="container py-5">
+        <h1 class="mb-4">✏️ Modifier un livre</h1>
 
-    <a href="/php/admin_book.php" class="btn btn-success mb-4">📚 Voir la bibliothèque (admin)</a>
+        <a href="/php/admin_book.php" class="btn btn-success mb-4">📚 Voir la bibliothèque (admin)</a>
+        <a href="../index.php" class="btn btn-warning mb-4">📚 Library</a>
+        <?php if ($message): ?>
+            <div class="alert alert-success"><?= htmlspecialchars($message) ?></div>
 
-    <?php if ($message): ?>
-        <div class="alert alert-success"><?= htmlspecialchars($message) ?></div>
-    <?php endif; ?>
+        <?php endif; ?>
 
-    <form method="POST" class="row g-3">
-        <?php
-        input('Titre', 'Titre');
-        input('Auteur', 'Auteur');
-        input('ISBN', 'ISBN', 'text', 4);
-        selectOuiNon('Dédicace', 'Dedicace', 4);
-        selectOuiNon('Marque-pages', 'Marquepages', 4);
-        selectOuiNon('Goodies', 'Goodies', 6);
-        input('Format', 'Format', 'text', 4);
-        input('Prix (€)', 'Prix', 'text', 4);
-        input("Date d'achat", 'Date_achat', 'date', 6);
-        input("Date de lecture", 'Date_lecture', 'date', 6);
-        input("Relecture", 'Relecture', 'date', 6);
-        selectOuiNon('Chronique écrite', 'Chronique_ecrite', 6);
-        selectOuiNon('Chronique publiée', 'Chronique_publiee', 6);
-        input("Maison d'édition", 'Maison_edition', 'text', 6);
-        input("Nombre de pages", 'Nombre_pages', 'number', 3);
-        input("Genre", 'Genre', 'text', 3);
-        selectNotation("Notation", 'Notation', $notations, 4);
-        input("Couple", 'Couple', 'text', 4);
-        input("Image (URL de couverture)", 'Couverture', 'text', 4);
-        textarea("Description", 'Details');
-        textarea("Chronique", 'Chronique');
-        textarea("Themes", 'Themes');
-        ?>
-        <div class="col-12 text-end mt-4">
-            <button type="submit" class="btn btn-success mb-3">💾 Enregistrer</button>
-            <a href="library.php" class="btn btn-primary mb-3">📚 Library</a>
-        </div>
-    </form>
-</div>
+        <form method="POST" class="row g-3">
+            <?php
+            input('Titre', 'Titre');
+            input('Auteur', 'Auteur');
+            input('ISBN', 'ISBN', 'text', 4);
+            selectOuiNon('Dédicace', 'Dedicace', 4);
+            selectOuiNon('Marque-pages', 'Marquepages', 4);
+            selectOuiNon('Goodies', 'Goodies', 6);
+            input('Format', 'Format', 'text', 4);
+            input('Prix (€)', 'Prix', 'text', 4);
+            input("Date d'achat", 'Date_achat', 'date', 6);
+            input("Date de lecture", 'Date_lecture', 'date', 6);
+            input("Relecture", 'Relecture', 'date', 6);
+            selectOuiNon('Chronique écrite', 'Chronique_ecrite', 6);
+            selectOuiNon('Chronique publiée', 'Chronique_publiee', 6);
+            input("Maison d'édition", 'Maison_edition', 'text', 6);
+            input("Nombre de pages", 'Nombre_pages', 'number', 3);
+            input("Genre", 'Genre', 'text', 3);
+            selectNotation("Notation", 'Notation', $notations, 4);
+            input("Couple", 'Couple', 'text', 4);
+            input("Image (URL de couverture)", 'Couverture', 'text', 4);
+            textarea("Description", 'Details');
+            textarea("Chronique", 'Chronique');
+            textarea("Themes", 'Themes');
+            ?>
+            <div class="col-12 text-end mt-4">
+                <button type="submit" class="btn btn-success mb-3">💾 Enregistrer</button>
+                <a href="library.php" class="btn btn-primary mb-3">📚 Library</a>
+            </div>
+        </form>
+    </div>
 </body>
+
 </html>

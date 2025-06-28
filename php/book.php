@@ -1,6 +1,14 @@
 <?php
 include 'connexion.php';
 
+// Suppression
+if (isset($_GET['delete'])) {
+    $deleteId = (int) $_GET['delete'];
+    $pdo->prepare("DELETE FROM library WHERE ID = ?")->execute([$deleteId]);
+    header("Location: admin_book.php?success=1");
+    exit;
+}
+
 $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $stmt = $pdo->prepare("SELECT * FROM library WHERE ID = ?");
 $stmt->execute([$id]);
@@ -10,13 +18,7 @@ if (!$book) {
     die("Livre introuvable.");
 }
 
-// Suppression
-if (isset($_GET['delete'])) {
-    $deleteId = (int) $_GET['delete'];
-    $pdo->prepare("DELETE FROM library WHERE ID = ?")->execute([$deleteId]);
-    header("Location: admin_book.php?success=1");
-    exit;
-}
+
 ?>
 
 <!DOCTYPE html>
@@ -56,8 +58,8 @@ if (isset($_GET['delete'])) {
 
 <body class="bg-light">
     <div class="container py-4">
-            <a href="library.php" class="btn btn-primary mb-3">Library</a>
-    <a href="add_manual.php" class="btn btn-primary mb-3">+ Ajout manuel</a>
+            <a href="../index.php" class="btn btn-warning mb-3">📚 Library</a>
+    <a href="add_manual.php" class="btn btn-primary mb-3">➕ Ajout manuel</a>
         <h1 class="mb-4"><?= htmlspecialchars($book['Titre']) ?></h1>
         <div class="row">
             <!-- Couverture -->
@@ -88,7 +90,7 @@ if (isset($_GET['delete'])) {
 
                 <!-- Actions -->
                 <div class="mt-3">
-                    <a href="library.php" class="btn btn-primary me-2">⬅ Retour</a>
+                    <a href="../index.php" class="btn btn-primary me-2">⬅ Retour</a>
                     <a href="update.php?id=<?= $book['ID'] ?>" class="btn btn-warning me-2">✏️ Modifier</a>
                     <a href="?delete=<?= $book['ID'] ?>" class="btn btn-danger" onclick="return confirm('Supprimer ce livre ?')">🗑️ Supprimer</a>
                 </div>

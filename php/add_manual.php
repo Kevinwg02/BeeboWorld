@@ -1,6 +1,11 @@
 <?php
 include 'connexion.php';
 
+$isbn = $_POST['isbn'] ?? '';
+$book = null;
+$message = '';
+$added = false;
+
 $message = '';
 $added = false;
 
@@ -64,8 +69,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <div class="container py-5">
         <h1 class="mb-4">✍️ Ajout manuel d’un livre</h1>
-        <a href="/php/admin_book.php" class="btn btn-success mb-4">Admin</a>
-        <a href="library.php" class="btn btn-primary mb-4">Library</a>
+        <a href="stats.php" class="btn btn-primary mb-2">📊 Stats</a>
+        <a href="../index.php" class="btn btn-warning mb-2">📚 Library</a>
+
 
 
         <?php if ($message): ?>
