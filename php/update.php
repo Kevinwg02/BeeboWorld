@@ -147,10 +147,12 @@ function selectNotation($label, $name, $notations, $size = 6) {
         input("Couple", 'Couple', 'text', 4);
         input("Image (URL de couverture)", 'Couverture', 'text', 4);
         textarea("Description", 'Details');
+        textarea("Chronique", 'Chronique');
+        textarea("Themes", 'Themes');
         ?>
         <div class="col-12 text-end mt-4">
-            <button type="submit" class="btn btn-success">💾 Enregistrer</button>
-            <a href="admin_book.php" class="btn btn-secondary">Retour</a>
+            <button type="submit" class="btn btn-success mb-3">💾 Enregistrer</button>
+            <a href="library.php" class="btn btn-primary mb-3">📚 Library</a>
         </div>
     </form>
 </div>

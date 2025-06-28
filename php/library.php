@@ -1,9 +1,59 @@
 <?php
 include 'connexion.php';
+if (isset($_GET['delete'])) {
+    $deleteId = (int) $_GET['delete'];
+    $stmt = $pdo->prepare("DELETE FROM library WHERE ID = ?");
+    $stmt->execute([$deleteId]);
+    header('Location: library.php');
+    exit;
+}
 
-// Récupération des livres
-$sql = "SELECT * FROM library ORDER BY ID DESC";
-$stmt = $pdo->query($sql);
+
+// Récupération des filtres
+$search = $_GET['search'] ?? '';
+$genreFilter = $_GET['genre'] ?? '';
+$notationFilter = $_GET['notation'] ?? '';
+$formatFilter = $_GET['format'] ?? '';
+
+// Construction de la requête SQL dynamique
+$whereClauses = [];
+$params = [];
+
+if ($search) {
+  $whereClauses[] = "(Titre LIKE ? OR Auteur LIKE ? OR Format LIKE ?)";
+  $params[] = "%$search%";
+  $params[] = "%$search%";
+  $params[] = "%$search%";
+}
+
+if ($genreFilter) {
+  $whereClauses[] = "Genre = ?";
+  $params[] = $genreFilter;
+}
+
+if ($notationFilter) {
+  $whereClauses[] = "notation = ?";
+  $params[] = $notationFilter;
+}
+
+if ($formatFilter) {
+  $whereClauses[] = "Format = ?";
+  $params[] = $formatFilter;
+}
+
+
+
+$whereSQL = $whereClauses ? 'WHERE ' . implode(' AND ', $whereClauses) : '';
+
+// Récupération des options pour les filtres
+$genres = $pdo->query("SELECT DISTINCT Genre FROM library WHERE Genre IS NOT NULL AND Genre != '' ORDER BY Genre")->fetchAll(PDO::FETCH_COLUMN);
+$notations = $pdo->query("SELECT DISTINCT notation FROM library WHERE notation IS NOT NULL AND notation != '' ORDER BY notation")->fetchAll(PDO::FETCH_COLUMN);
+$formats = $pdo->query("SELECT DISTINCT Format FROM library WHERE Format IS NOT NULL AND Format != '' ORDER BY Format")->fetchAll(PDO::FETCH_COLUMN);
+
+// Récupération des livres filtrés
+$sql = "SELECT * FROM library $whereSQL ORDER BY ID DESC";
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
 $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -11,10 +61,10 @@ $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <html lang="fr">
 
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Ma Bibliothèque</title>
   <link rel="shortcut icon" href="../assets/favicon.ico" type="image/x-icon">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     .card-img-top {
       height: 20em;
@@ -32,44 +82,87 @@ $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </head>
 
 <body class="bg-light">
+
   <div class="container py-4">
     <h1 class="mb-4">📚 Ma Bibliothèque</h1>
-    <a href="../index.php" class="btn btn-success mb-4">ISBN</a>
-    <a href="/php/admin_book.php" class="btn btn-success mb-4">📚 Voir la bibliothèque (admin)</a>
-    <a href="add_manual.php" class="btn btn-success mb-4">+ Ajout manuel</a>
+
+    <form method="GET" class="row g-3 mb-4">
+      <div class="col-md-3">
+        <input type="text" name="search" class="form-control" placeholder="Titre ou auteur..." value="<?= htmlspecialchars($search) ?>">
+      </div>
+      <div class="col-md-2">
+        <select name="genre" class="form-select">
+          <option value="">-- Tous les genres --</option>
+          <?php foreach ($genres as $genre): ?>
+            <option value="<?= htmlspecialchars($genre) ?>" <?= $genreFilter === $genre ? 'selected' : '' ?>>
+              <?= htmlspecialchars($genre) ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select name="notation" class="form-select">
+          <option value="">-- Toutes les médailles --</option>
+          <?php foreach ($notations as $notation): ?>
+            <option value="<?= htmlspecialchars($notation) ?>" <?= $notationFilter === $notation ? 'selected' : '' ?>>
+              <?= htmlspecialchars($notation) ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select name="format" class="form-select">
+          <option value="">-- Tous les formats --</option>
+          <?php foreach ($formats as $format): ?>
+            <option value="<?= htmlspecialchars($format) ?>" <?= $formatFilter === $format ? 'selected' : '' ?>>
+              <?= htmlspecialchars($format) ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="col-md-2 d-flex gap-2">
+        <button class="btn btn-primary" type="submit">Filtrer</button>
+        <a href="<?= strtok($_SERVER["REQUEST_URI"], '?') ?>" class="btn btn-outline-secondary">Réinitialiser</a>
+      </div>
+    </form>
+
+    <div class="mb-3">
+      <a href="../index.php" class="btn btn-success me-2">📘 ISBN</a>
+
+      <a href="add_manual.php" class="btn btn-success">➕ Ajout manuel</a>
+    </div>
 
     <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
-      <?php foreach ($books as $book): ?>
-        <?php
-        $coverUrl = '';
-        if (!empty($book['Couverture'])) {
-          $coverUrl = htmlspecialchars($book['Couverture']);
-        } elseif (!empty($book['ISBN'])) {
-          // Clean ISBN (remove dashes or non-digit characters except X)
-          $isbn = preg_replace('/[^0-9Xx]/', '', $book['ISBN']);
-          $coverUrl = "https://covers.openlibrary.org/b/isbn/{$isbn}-L.jpg";
-        }
-        ?>
-        <div class="col">
-          <div class="card h-100 shadow-sm">
-            <?php if (!empty($coverUrl)): ?>
-              <img src="<?= $coverUrl ?>" class="card-img-top" alt="Couverture de <?= htmlspecialchars($book['Titre']) ?>">
-            <?php else: ?>
-              <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 10em;">
-                Pas d'image
+      <?php if ($books): ?>
+        <?php foreach ($books as $book): ?>
+          <?php
+          if (!empty($book['Couverture'])) {
+            $coverUrl = htmlspecialchars($book['Couverture']);
+          } elseif (!empty($book['ISBN'])) {
+            $isbn = preg_replace('/[^0-9Xx]/', '', $book['ISBN']);
+            $coverUrl = "https://covers.openlibrary.org/b/isbn/{$isbn}-L.jpg";
+          } else {
+            $coverUrl = "https://greenhousescribes.com/wp-content/uploads/2020/10/book-cover-generic.jpg";
+          }
+          ?>
+          <div class="col">
+            <div class="card h-100 shadow-sm">
+              <a href="book.php?id=<?= $book['ID'] ?>">
+                <img src="<?= $coverUrl ?>" class="card-img-top" alt="Couverture de <?= htmlspecialchars($book['Titre']) ?>">
+              </a>
+              <div class="card-body p-2 d-flex align-items-center justify-content-center">
+                <h5 class="card-title" title="<?= htmlspecialchars($book['Titre']) ?>"><?= htmlspecialchars($book['Titre']) ?></h5>
               </div>
-            <?php endif; ?>
-            <div class="card-body p-2 d-flex align-items-center justify-content-center">
-              <h5 class="card-title" title="<?= htmlspecialchars($book['Titre']) ?>"><?= htmlspecialchars($book['Titre']) ?></h5>
             </div>
           </div>
-        </div>
-      <?php endforeach; ?>
-      <?php if (empty($books)): ?>
+        <?php endforeach; ?>
+
+      <?php else: ?>
         <p class="text-center text-muted">Aucun livre trouvé.</p>
       <?php endif; ?>
     </div>
   </div>
+
 </body>
 
 </html>
