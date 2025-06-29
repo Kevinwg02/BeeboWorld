@@ -1,20 +1,13 @@
 <?php
 include 'php/connexion.php';
 
+// Suppression d'un livre
 if (isset($_GET['delete'])) {
     $deleteId = (int) $_GET['delete'];
     $stmt = $pdo->prepare("DELETE FROM library WHERE ID = ?");
     $stmt->execute([$deleteId]);
     header('Location: index.php?deleted=1');
     exit;
-}
-
-// Récupération des localisations existantes dans la BDD
-try {
-    $stmt = $pdo->query("SELECT DISTINCT localisation FROM library WHERE localisation IS NOT NULL AND localisation != '' ORDER BY localisation ASC");
-    $localisations = $stmt->fetchAll(PDO::FETCH_COLUMN);
-} catch (PDOException $e) {
-    $localisations = [];
 }
 
 // Récupération des filtres
@@ -25,7 +18,7 @@ $formatFilter = $_GET['format'] ?? '';
 $localisationFilter = $_GET['localisation'] ?? '';
 $etatLuFilter = $_GET['etat_lu'] ?? '';
 
-// Construction de la requête SQL dynamique
+// Construction dynamique de la requête WHERE
 $whereClauses = [];
 $params = [];
 
@@ -64,12 +57,22 @@ if ($etatLuFilter === 'oui') {
 
 $whereSQL = $whereClauses ? 'WHERE ' . implode(' AND ', $whereClauses) : '';
 
-// Récupération des options pour les filtres
-$genres = $pdo->query("SELECT DISTINCT Genre FROM library WHERE Genre IS NOT NULL AND Genre != '' ORDER BY Genre")->fetchAll(PDO::FETCH_COLUMN);
-$notations = $pdo->query("SELECT DISTINCT notation FROM library WHERE notation IS NOT NULL AND notation != '' ORDER BY notation")->fetchAll(PDO::FETCH_COLUMN);
-$formats = $pdo->query("SELECT DISTINCT Format FROM library WHERE Format IS NOT NULL AND Format != '' ORDER BY Format")->fetchAll(PDO::FETCH_COLUMN);
+// Pagination
+$livresParPage = 10;
+$pageActuelle = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 
-// Récupération des livres filtrés
+// Total des livres pour pagination
+$countSql = "SELECT COUNT(*) FROM library $whereSQL";
+$countStmt = $pdo->prepare($countSql);
+$countStmt->execute($params);
+$totalLivres = $countStmt->fetchColumn();
+
+$totalPages = min(10000, ceil($totalLivres / $livresParPage));
+$totalPages = max(1, $totalPages); // Évite d'avoir 0 page
+$pageActuelle = min($pageActuelle, $totalPages);
+$offset = ($pageActuelle - 1) * $livresParPage;
+
+// Récupération des livres
 $sql = "
     SELECT *, 
            CASE 
@@ -79,16 +82,21 @@ $sql = "
     FROM library
     $whereSQL
     ORDER BY ID DESC
+    LIMIT $livresParPage OFFSET $offset
 ";
-
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Filtres (select distincts)
+$genres = $pdo->query("SELECT DISTINCT Genre FROM library WHERE Genre IS NOT NULL AND Genre != '' ORDER BY Genre")->fetchAll(PDO::FETCH_COLUMN);
+$notations = $pdo->query("SELECT DISTINCT notation FROM library WHERE notation IS NOT NULL AND notation != '' ORDER BY notation")->fetchAll(PDO::FETCH_COLUMN);
+$formats = $pdo->query("SELECT DISTINCT Format FROM library WHERE Format IS NOT NULL AND Format != '' ORDER BY Format")->fetchAll(PDO::FETCH_COLUMN);
+$localisations = $pdo->query("SELECT DISTINCT localisation FROM library WHERE localisation IS NOT NULL AND localisation != '' ORDER BY localisation")->fetchAll(PDO::FETCH_COLUMN);
 ?>
 
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
     <meta charset="UTF-8">
     <title>Ma Bibliothèque</title>
@@ -99,7 +107,6 @@ $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
             height: 20em;
             object-fit: cover;
         }
-
         .card-title {
             font-size: 0.8rem;
             white-space: nowrap;
@@ -111,126 +118,134 @@ $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </head>
 
 <body class="bg-light">
+<div class="container py-4">
     <?php if (isset($_GET['deleted']) && $_GET['deleted'] == 1): ?>
         <div class="alert alert-success">📘 Livre supprimé avec succès.</div>
     <?php endif; ?>
 
-    <div class="container py-4">
-        <h1 class="mb-4">📚 Ma Bibliothèque</h1>
+    <h1 class="mb-4">📚 Ma Bibliothèque</h1>
 
-        <form method="GET" class="d-flex flex-wrap gap-2 align-items-center mb-4">
-            <input type="text" name="search" class="form-control" placeholder="Titre ou auteur..." value="<?= htmlspecialchars($search) ?>" style="min-width: 200px;">
+    <form method="GET" class="d-flex flex-wrap gap-2 align-items-center mb-4">
+        <input type="text" name="search" class="form-control" placeholder="Titre ou auteur..." value="<?= htmlspecialchars($search) ?>" style="min-width: 200px;">
 
-            <select name="genre" class="form-select" style="width: 250px;">
-                <option value="">Tous les genres</option>
-                <?php foreach ($genres as $genre): ?>
-                    <option value="<?= htmlspecialchars($genre) ?>" <?= $genreFilter === $genre ? 'selected' : '' ?>>
-                        <?= htmlspecialchars($genre) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
+        <select name="genre" class="form-select" style="width: 250px;">
+            <option value="">Tous les genres</option>
+            <?php foreach ($genres as $genre): ?>
+                <option value="<?= htmlspecialchars($genre) ?>" <?= $genreFilter === $genre ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($genre) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
 
-            <select name="notation" class="form-select" style="width: 250px;">
-                <option value="">Toutes les médailles</option>
-                <?php foreach ($notations as $notation): ?>
-                    <option value="<?= htmlspecialchars($notation) ?>" <?= $notationFilter === $notation ? 'selected' : '' ?>>
-                        <?= htmlspecialchars($notation) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
+        <select name="notation" class="form-select" style="width: 250px;">
+            <option value="">Toutes les médailles</option>
+            <?php foreach ($notations as $notation): ?>
+                <option value="<?= htmlspecialchars($notation) ?>" <?= $notationFilter === $notation ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($notation) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
 
-            <select name="localisation" class="form-select" style="width: 250px;">
-                <option value="">Localisation des livres</option>
-                <?php foreach ($localisations as $loc): ?>
-                    <option value="<?= htmlspecialchars($loc) ?>" <?= $localisationFilter === $loc ? 'selected' : '' ?>>
-                        <?= htmlspecialchars($loc) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
+        <select name="localisation" class="form-select" style="width: 250px;">
+            <option value="">Localisation des livres</option>
+            <?php foreach ($localisations as $loc): ?>
+                <option value="<?= htmlspecialchars($loc) ?>" <?= $localisationFilter === $loc ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($loc) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
 
-            <select name="format" class="form-select" style="width: 250px;">
-                <option value="">Tous les formats</option>
-                <?php foreach ($formats as $format): ?>
-                    <option value="<?= htmlspecialchars($format) ?>" <?= $formatFilter === $format ? 'selected' : '' ?>>
-                        <?= htmlspecialchars($format) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
+        <select name="format" class="form-select" style="width: 250px;">
+            <option value="">Tous les formats</option>
+            <?php foreach ($formats as $format): ?>
+                <option value="<?= htmlspecialchars($format) ?>" <?= $formatFilter === $format ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($format) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
 
-            <select name="etat_lu" class="form-select" style="width: 250px;">
-                <option value="">État lu</option>
-                <option value="oui" <?= $etatLuFilter === 'oui' ? 'selected' : '' ?>>Oui</option>
-                <option value="non" <?= $etatLuFilter === 'non' ? 'selected' : '' ?>>Non</option>
-            </select>
+        <select name="etat_lu" class="form-select" style="width: 250px;">
+            <option value="">Lu ou non</option>
+            <option value="oui" <?= $etatLuFilter === 'oui' ? 'selected' : '' ?>>Oui</option>
+            <option value="non" <?= $etatLuFilter === 'non' ? 'selected' : '' ?>>Non</option>
+        </select>
 
-            <button type="submit" class="btn btn-primary">Filtrer</button>
-            <a href="<?= strtok($_SERVER["REQUEST_URI"], '?') ?>" class="btn btn-outline-secondary">Réinitialiser</a>
-        </form>
+        <button type="submit" class="btn btn-primary">Filtrer</button>
+        <a href="<?= strtok($_SERVER["REQUEST_URI"], '?') ?>" class="btn btn-outline-secondary">Réinitialiser</a>
+    </form>
 
-        <div class="mb-3">
-            <a href="php/stats.php" class="btn btn-warning mb-2">📊 Stats</a>
-            <a href="php/add_manual.php" class="btn btn-primary mb-2">➕ Ajout manuel</a>
-            <button type="button" class="btn btn-info mb-2" data-bs-toggle="modal" data-bs-target="#pagesModal">
-                📖 Pages lues
-            </button>
-        </div>
+    <div class="mb-3">
+        <a href="php/stats.php" class="btn btn-warning mb-2">📊 Stats</a>
+        <a href="php/add_manual.php" class="btn btn-primary mb-2">➕ Ajout manuel</a>
+        <button type="button" class="btn btn-info mb-2" data-bs-toggle="modal" data-bs-target="#pagesModal">
+            📖 Pages lues
+        </button>
+    </div>
 
-        <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
-            <?php if ($books): ?>
-                <?php foreach ($books as $book): ?>
-                    <?php
-                    if (!empty($book['Couverture'])) {
-                        $coverUrl = htmlspecialchars($book['Couverture']);
-                    } elseif (!empty($book['ISBN'])) {
-                        $isbn = preg_replace('/[^0-9Xx]/', '', $book['ISBN']);
-                        $coverUrl = "https://covers.openlibrary.org/b/isbn/{$isbn}-L.jpg";
-                    } else {
-                        $coverUrl = "https://greenhousescribes.com/wp-content/uploads/2020/10/book-cover-generic.jpg";
-                    }
-                    ?>
-                    <div class="col">
-                        <div class="card h-100 shadow-sm">
-                            <a href="php/book.php?id=<?= $book['ID'] ?>">
-                                <img src="<?= $coverUrl ?>" class="card-img-top" alt="Couverture de <?= htmlspecialchars($book['Titre']) ?>">
-                            </a>
-                            <div class="card-body p-2 d-flex align-items-center justify-content-center">
-                                <h5 class="card-title" title="<?= htmlspecialchars($book['Titre']) ?>"><?= htmlspecialchars($book['Titre']) ?></h5>
-                            </div>
+    <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
+        <?php if ($books): ?>
+            <?php foreach ($books as $book): ?>
+                <?php
+                $coverUrl = !empty($book['Couverture']) ? htmlspecialchars($book['Couverture']) :
+                    (!empty($book['ISBN']) ? "https://covers.openlibrary.org/b/isbn/" . preg_replace('/[^0-9Xx]/', '', $book['ISBN']) . "-L.jpg" :
+                    "https://greenhousescribes.com/wp-content/uploads/2020/10/book-cover-generic.jpg");
+                ?>
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <a href="php/book.php?id=<?= $book['ID'] ?>">
+                            <img src="<?= $coverUrl ?>" class="card-img-top" alt="Couverture de <?= htmlspecialchars($book['Titre']) ?>">
+                        </a>
+                        <div class="card-body p-2 d-flex align-items-center justify-content-center">
+                            <h5 class="card-title" title="<?= htmlspecialchars($book['Titre']) ?>"><?= htmlspecialchars($book['Titre']) ?></h5>
                         </div>
                     </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <p class="text-center text-muted">Aucun livre trouvé.</p>
-            <?php endif; ?>
-        </div>
+                </div>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <p class="text-center text-muted">Aucun livre trouvé.</p>
+        <?php endif; ?>
     </div>
 
-    <!-- Modal Ajout Pages Lues -->
-    <div class="modal fade" id="pagesModal" tabindex="-1" aria-labelledby="pagesModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <form method="POST" action="php/pages_lu.php" class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="pagesModalLabel">Ajouter des pages lues</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="date" class="form-label">Date</label>
-                        <input type="date" class="form-control" name="date" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="pages" class="form-label">Nombre de pages lues</label>
-                        <input type="number" class="form-control" name="pages" min="1" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <?php if ($totalPages > 1): ?>
+        <nav class="mt-4 d-flex justify-content-center">
+            <ul class="pagination">
+                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                    <li class="page-item <?= $i == $pageActuelle ? 'active' : '' ?>">
+                        <a class="page-link" href="?<?= http_build_query(array_merge($_GET, ['page' => $i])) ?>">
+                            <?= $i ?>
+                        </a>
+                    </li>
+                <?php endfor; ?>
+            </ul>
+        </nav>
+    <?php endif; ?>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Modal Ajout Pages Lues -->
+<div class="modal fade" id="pagesModal" tabindex="-1" aria-labelledby="pagesModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="POST" action="php/pages_lu.php" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pagesModalLabel">Ajouter des pages lues</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="date" class="form-label">Date</label>
+                    <input type="date" class="form-control" name="date" required>
+                </div>
+                <div class="mb-3">
+                    <label for="pages" class="form-label">Nombre de pages lues</label>
+                    <input type="number" class="form-control" name="pages" min="1" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>

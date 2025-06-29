@@ -1,6 +1,28 @@
 <?php
 include 'connexion.php';
 
+// Statistiques globales avec filtre "bibliotheque"
+$annee_actuelle = date('Y');
+
+// Livres lus cette année
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM library WHERE YEAR(Date_lecture) = ? AND localisation = 'bibliotheque'");
+$stmt->execute([$annee_actuelle]);
+$nb_lus_annee = $stmt->fetchColumn();
+
+// Livres achetés cette année
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM library WHERE YEAR(Date_achat) = ? AND localisation = 'bibliotheque'");
+$stmt->execute([$annee_actuelle]);
+$nb_achetes_annee = $stmt->fetchColumn();
+
+// Nombre total de livres dans la bibliothèque
+$stmt = $pdo->query("SELECT COUNT(*) FROM library WHERE localisation = 'bibliotheque'");
+$nb_total_biblio = $stmt->fetchColumn();
+
+// Somme totale des prix
+$stmt = $pdo->query("SELECT SUM(Prix) FROM library WHERE Prix IS NOT NULL AND localisation = 'bibliotheque'");
+$prix_total = $stmt->fetchColumn();
+
+
 // Fonction pour formater mois en MM-YYYY
 function formatMois($annee, $mois)
 {
@@ -89,6 +111,32 @@ foreach ($all_months as $m) {
         </div>
 
         <h1>Statistiques de la bibliothèque</h1>
+        <div class="row text-center mb-4">
+            <div class="col-md-3">
+                <div class="bg-white rounded shadow-sm p-3">
+                    <h5 class="text-muted">Livres lus en <?= $annee_actuelle ?></h5>
+                    <h3 class="text-primary"><?= $nb_lus_annee ?></h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="bg-white rounded shadow-sm p-3">
+                    <h5 class="text-muted">Livres achetés en <?= $annee_actuelle ?></h5>
+                    <h3 class="text-success"><?= $nb_achetes_annee ?></h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="bg-white rounded shadow-sm p-3">
+                    <h5 class="text-muted">Livres dans la bibliothèque</h5>
+                    <h3 class="text-dark"><?= $nb_total_biblio ?></h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="bg-white rounded shadow-sm p-3">
+                    <h5 class="text-muted">Total dépenses</h5>
+                    <h3 class="text-danger"><?= number_format($prix_total, 2, ',', ' ') ?> €</h3>
+                </div>
+            </div>
+        </div>
 
         <div class="row">
             <div class="col-md-6">
