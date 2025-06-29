@@ -82,6 +82,9 @@ $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </head>
 
 <body class="bg-light">
+<?php if (isset($_GET['deleted']) && $_GET['deleted'] == 1): ?>
+    <div class="alert alert-success">📘 Livre supprimé avec succès.</div>
+<?php endif; ?>
 
     <div class="container py-4">
         <h1 class="mb-4">📚 Ma Bibliothèque</h1>

@@ -5,7 +5,7 @@ include 'connexion.php';
 if (isset($_GET['delete'])) {
     $deleteId = (int) $_GET['delete'];
     $pdo->prepare("DELETE FROM library WHERE ID = ?")->execute([$deleteId]);
-    header("Location: admin_book.php?success=1");
+    header("Location: ../index.php?deleted=1");
     exit;
 }
 
