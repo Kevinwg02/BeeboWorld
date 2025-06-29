@@ -86,16 +86,39 @@ if (!$book) {
                         "Goodies",
                         "Format",
                         "Marquepages",
-                        "Chronique_ecrite",
-                        "Chronique_publiee",
                         "Nombre_pages",
                         "Relecture",
                         "Genre",
                         "Notation",
                         "Couple",
-                        "Themes"
+                        "Themes",
+                        "localisation",
+                    ];
+                    $fieldLabels = [
+                        "Auteur" => "Auteur",
+                        "ISBN" => "ISBN",
+                        "Date_achat" => "Date d'achat",
+                        "Prix" => "Prix (€)",
+                        "Date_lecture" => "Date de lecture",
+                        "Dedicace" => "Dédicace",
+                        "Maison_edition" => "Maison d'édition",
+                        "Goodies" => "Goodies",
+                        "Format" => "Format",
+                        "Marquepages" => "Marque-pages",
+                        "Nombre_pages" => "Nombre de pages",
+                        "Relecture" => "Relecture",
+                        "Genre" => "Genre",
+                        "Notation" => "Notation",
+                        "Couple" => "Couple",
+                        "Themes" => "Thèmes",
+                        "localisation" => "Emplacement dans la bibliothèque"
                     ];
                     foreach ($fields as $field):
+                        // Ignorer les champs qui seront affichés dans la section "Livre lu"
+                        if (!empty($book['Date_lecture']) && in_array($field, ['Date_lecture', 'Notation', 'Relecture'])) {
+                            continue;
+                        }
+
                         $value = $book[$field] ?? '';
 
                         // Reformater la date au format français uniquement pour les champs de date
@@ -107,10 +130,59 @@ if (!$book) {
                         }
                     ?>
                         <div class="col-md-6 detail-row">
-                            <span class="label"><?= htmlspecialchars($field) ?> :</span><br>
+                            <span class="label"><?= htmlspecialchars($fieldLabels[$field] ?? $field) ?> :</span><br>
                             <span class="value"><?= nl2br(htmlspecialchars($value)) ?></span>
                         </div>
                     <?php endforeach; ?>
+                    <?php if (!empty($book['Date_lecture']) && $book['Date_lecture'] !== '0000-00-00'): ?>
+                        <div class="mt-4 p-3 bg-success bg-opacity-10 border border-success rounded">
+                            <h5 class="text-success mb-3">📖 Ce livre a été lu</h5>
+                            <div class="row">
+                                <?php
+                                // Date de lecture
+                                $dateLecture = DateTime::createFromFormat('Y-m-d', $book['Date_lecture']);
+                                echo "<div class='col-md-6 detail-row'><span class='label'>Date de lecture :</span><br><span class='value'>" . $dateLecture->format('d-m-Y') . "</span></div>";
+
+                                // Notation
+                                if (!empty($book['Notation'])) {
+                                    echo "<div class='col-md-6 detail-row'><span class='label'>Notation :</span><br><span class='value'>" . htmlspecialchars($book['Notation']) . "</span></div>";
+                                }
+
+                                // Relecture
+                                if (!empty($book['Relecture']) && $book['Relecture'] !== '0000-00-00') {
+                                    $dateRelecture = DateTime::createFromFormat('Y-m-d', $book['Relecture']);
+                                    echo "<div class='col-md-6 detail-row'><span class='label'>Relecture :</span><br><span class='value'>" . $dateRelecture->format('d-m-Y') . "</span></div>";
+                                }
+
+                                // Couple
+                                if (!empty($book['Couple'])) {
+                                    echo "<div class='col-md-6 detail-row'><span class='label'>Couple :</span><br><span class='value'>" . htmlspecialchars($book['Couple']) . "</span></div>";
+                                }
+
+                                // Chronique écrite
+                                if (!empty($book['Chronique_ecrite'])) {
+                                    echo "<div class='col-md-6 detail-row'><span class='label'>Chronique écrite :</span><br><span class='value'>" . htmlspecialchars($book['Chronique_ecrite']) . "</span></div>";
+                                }
+
+                                // Chronique publiée
+                                if (!empty($book['Chronique_publiee'])) {
+                                    echo "<div class='col-md-6 detail-row'><span class='label'>Chronique publiée :</span><br><span class='value'>" . htmlspecialchars($book['Chronique_publiee']) . "</span></div>";
+                                }
+
+                                // Affichage de la chronique si elle est écrite + publiée + non vide
+                                if (
+                                    !empty($book['Chronique']) &&
+                                    strtolower($book['Chronique_ecrite']) === 'oui' &&
+                                    strtolower($book['Chronique_publiee']) !== 'non'
+                                ) {
+                                    echo "<div class='col-12 mt-3'><span class='label'>📝 Chronique :</span><br><div class='value border p-2 rounded bg-white'>" . nl2br(htmlspecialchars($book['Chronique'])) . "</div></div>";
+                                }
+                                ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+
 
                 </div>
 

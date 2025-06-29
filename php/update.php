@@ -8,6 +8,29 @@ if (!$id) {
     die("ID de livre manquant.");
 }
 
+// Charger notations existantes
+try {
+    $stmt = $pdo->query("SELECT DISTINCT Notation FROM library WHERE Notation IS NOT NULL AND Notation != '' ORDER BY Notation ASC");
+    $notations = $stmt->fetchAll(PDO::FETCH_COLUMN);
+} catch (PDOException $e) {
+    $notations = [];
+}
+
+// Récupération des localisation existants dans la BDD
+try {
+    $stmt = $pdo->query("SELECT DISTINCT localisation FROM library WHERE localisation IS NOT NULL AND localisation != '' ORDER BY localisation ASC");
+    $localisation = $stmt->fetchAll(PDO::FETCH_COLUMN);
+} catch (PDOException $e) {
+    $localisation = [];
+}
+// Récupération des genres existants dans la BDD
+try {
+    $stmt = $pdo->query("SELECT DISTINCT localisation FROM library WHERE localisation IS NOT NULL AND localisation != '' ORDER BY localisation ASC");
+    $localisation = $stmt->fetchAll(PDO::FETCH_COLUMN);
+} catch (PDOException $e) {
+    $localisation = [];
+}
+
 // Récupérer le livre
 $stmt = $pdo->prepare("SELECT * FROM library WHERE ID = ?");
 $stmt->execute([$id]);
@@ -38,16 +61,11 @@ $fields = [
     'Notation',
     'Genre',
     'Couple',
-    'Couverture'
+    'Couverture',
+    'localisation',
 ];
 
-// Charger notations existantes
-try {
-    $stmt = $pdo->query("SELECT DISTINCT Notation FROM library WHERE Notation IS NOT NULL AND Notation != '' ORDER BY Notation ASC");
-    $notations = $stmt->fetchAll(PDO::FETCH_COLUMN);
-} catch (PDOException $e) {
-    $notations = [];
-}
+
 
 // Traitement formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -166,16 +184,18 @@ function selectNotation($label, $name, $notations, $size = 6)
             input("Maison d'édition", 'Maison_edition', 'text', 6);
             input("Nombre de pages", 'Nombre_pages', 'number', 3);
             input("Genre", 'Genre', 'text', 3);
+            input("localisation", 'localisation');
             selectNotation("Notation", 'Notation', $notations, 4);
             input("Couple", 'Couple', 'text', 4);
             input("Image (URL de couverture)", 'Couverture', 'text', 4);
             textarea("Description", 'Details');
             textarea("Chronique", 'Chronique');
             textarea("Themes", 'Themes');
+
             ?>
             <div class="col-12 text-end mt-4">
                 <button type="submit" class="btn btn-success mb-3">💾 Enregistrer</button>
-                <a href="library.php" class="btn btn-primary mb-3">📚 Library</a>
+                <a href="../index.php" class="btn btn-primary mb-3">📚 Library</a>
             </div>
         </form>
     </div>

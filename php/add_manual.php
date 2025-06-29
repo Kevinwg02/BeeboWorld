@@ -9,6 +9,28 @@ $added = false;
 $message = '';
 $added = false;
 
+// Récupération des localisation existants dans la BDD
+try {
+    $stmt = $pdo->query("SELECT DISTINCT localisation FROM library WHERE localisation IS NOT NULL AND localisation != '' ORDER BY localisation ASC");
+    $localisation = $stmt->fetchAll(PDO::FETCH_COLUMN);
+} catch (PDOException $e) {
+    $localisation = [];
+}
+// Récupération des genres existants dans la BDD
+try {
+    $stmt = $pdo->query("SELECT DISTINCT Format FROM library WHERE Format IS NOT NULL AND Format != '' ORDER BY Format ASC");
+    $formats = $stmt->fetchAll(PDO::FETCH_COLUMN);
+} catch (PDOException $e) {
+    $formats = [];
+}
+// Récupération des formtats existants dans la BDD
+try {
+    $stmt = $pdo->query("SELECT DISTINCT Genre FROM library WHERE Genre IS NOT NULL AND Genre != '' ORDER BY Genre ASC");
+    $genres = $stmt->fetchAll(PDO::FETCH_COLUMN);
+} catch (PDOException $e) {
+    $genres = [];
+}
+
 // Récupération des notations existantes dans la BDD
 try {
     $stmt = $pdo->query("SELECT DISTINCT Notation FROM library WHERE Notation IS NOT NULL AND Notation != '' ORDER BY Notation ASC");
@@ -20,8 +42,8 @@ try {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $stmt = $pdo->prepare("INSERT INTO library 
-            (Auteur, Titre, Dedicace, Marquepages, Goodies, ISBN, Format, Prix, Date_achat, Date_lecture, Relecture, Chronique_ecrite, Chronique_publiee, Details, Maison_edition, Nombre_pages, Notation, Genre, Couverture, Couple)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            (Auteur, Titre, Dedicace, Marquepages, Goodies, ISBN, Format, Prix, Date_achat, Date_lecture, Relecture, Chronique_ecrite, Chronique_publiee, Details, Maison_edition, Nombre_pages, Notation, Genre, Couverture, Couple, Chronique, localisation)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
         $stmt->execute([
             $_POST['auteur'] ?? '',
@@ -43,7 +65,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_POST['notation'] ?? '',
             $_POST['genre'] ?? '',
             $_POST['couverture'] ?? '',
-            $_POST['couple'] ?? ''
+            $_POST['couple'] ?? '',
+            $_POST['chronique'] ?? '',
+            $_POST['localisation'] ?? ''
         ]);
 
         $message = "Livre ajouté avec succès !";
@@ -121,10 +145,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </select>
             </div>
 
-            <div class="col-md-4">
+          
+
+             <div class="col-md-3">
                 <label>Format</label>
-                <input type="text" name="format" class="form-control">
+                <input type="text" name="genre" class="form-control" list="format-list">
+                <datalist id="format-list">
+                    <?php foreach ($formats as $formats): ?>
+                        <option value="<?= htmlspecialchars($formats) ?>">
+                        <?php endforeach; ?>
+                </datalist>
             </div>
+
             <div class="col-md-4">
                 <label>Prix (€)</label>
                 <input type="text" name="prix" class="form-control">
@@ -167,13 +199,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <div class="col-md-3">
                 <label>Genre</label>
-                <input type="text" name="genre" class="form-control">
+                <input type="text" name="genre" class="form-control" list="genre-list">
+                <datalist id="genre-list">
+                    <?php foreach ($genres as $genre): ?>
+                        <option value="<?= htmlspecialchars($genre) ?>">
+                        <?php endforeach; ?>
+                </datalist>
             </div>
+             <div class="col-md-3">
+                <label>Localisation</label>
+                <input type="text" name="localisation" class="form-control" list="localisation-list">
+                <datalist id="localisation-list">
+                    <?php foreach ($localisation as $localisation): ?>
+                        <option value="<?= htmlspecialchars($localisation) ?>">
+                        <?php endforeach; ?>
+                </datalist>
+            </div>
+
 
             <div class="col-md-4">
                 <label>Notation</label>
                 <select name="notation" class="form-select">
-                    <option value="">-- Choisir une médaille --</option>
+                    <option value=""> Choisir une notation </option>
                     <?php foreach ($notations as $notation): ?>
                         <option value="<?= htmlspecialchars($notation) ?>" <?= isset($livre['notation']) && $livre['notation'] === $notation ? 'selected' : '' ?>>
                             <?= htmlspecialchars($notation) ?>
@@ -193,6 +240,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="col-12">
                 <label>Description</label>
                 <textarea name="details" class="form-control" rows="4"></textarea>
+            </div>
+               <div class="col-12">
+                <label>Chronique</label>
+                <textarea name="chronique" class="form-control" rows="4"></textarea>
             </div>
 
             <div class="col-12 text-end">

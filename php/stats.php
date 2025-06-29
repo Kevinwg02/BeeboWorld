@@ -6,6 +6,12 @@ function formatMois($annee, $mois)
 {
     return sprintf("%02d-%s", $mois, $annee);
 }
+// Récupération des pages lues par mois
+$pages_par_mois = [];
+$stmt = $pdo->query("SELECT DATE_FORMAT(date, '%Y-%m') AS mois, SUM(pages) AS total FROM nb_page_lu GROUP BY mois ORDER BY mois DESC");
+while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    $pages_par_mois[$row['mois']] = (int)$row['total'];
+}
 
 // Récupération des achats par mois
 $achats_par_mois = [];
@@ -43,8 +49,9 @@ $achats_par_annee = regrouperParAnnee($achats_par_mois);
 $lectures_par_annee = regrouperParAnnee($lectures_par_mois);
 
 // Préparation données pour graphique : fusion des mois uniques
-$all_months = array_unique(array_merge(array_keys($achats_par_mois), array_keys($lectures_par_mois)));
+$all_months = array_unique(array_merge(array_keys($achats_par_mois), array_keys($lectures_par_mois), array_keys($pages_par_mois)));
 sort($all_months);
+
 
 // Préparer arrays JS pour counts
 $achats_js = [];
@@ -56,7 +63,9 @@ foreach ($all_months as $m) {
 
 // Labels format MM-YYYY en JS
 $labels_js = [];
+$pages_js = [];
 foreach ($all_months as $m) {
+    $pages_js[] = $pages_par_mois[$m] ?? 0;
     $labels_js[] = substr($m, 5, 2) . '-' . substr($m, 0, 4);
 }
 ?>
@@ -80,8 +89,16 @@ foreach ($all_months as $m) {
 
         <h1>Statistiques de la bibliothèque</h1>
 
-        <h2>Graphique des achats et lectures par mois</h2>
-        <canvas id="chartStats" style="max-width: 900px; max-height: 400px;"></canvas>
+        <div class="row">
+            <div class="col-md-6">
+                <h2>Graphique des achats et lectures par mois</h2>
+                <canvas id="chartStats" style="width: 100%; height: 350px;"></canvas>
+            </div>
+            <div class="col-md-6">
+                <h2>Graphique des pages lues par mois</h2>
+                <canvas id="chartPages" style="width: 100%; height: 350px;"></canvas>
+            </div>
+        </div>
 
         <div class="row mt-5">
             <div class="col-md-6">
@@ -148,12 +165,12 @@ foreach ($all_months as $m) {
                 datasets: [{
                         label: 'Livres achetés',
                         data: dataAchats,
-                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                        backgroundColor: 'rgba(0, 248, 74, 0.7)',
                     },
                     {
                         label: 'Livres lus',
                         data: dataLectures,
-                        backgroundColor: 'rgba(255, 159, 64, 0.7)',
+                        backgroundColor: 'rgba(0, 195, 255, 0.7)',
                     }
                 ]
             },
@@ -163,12 +180,52 @@ foreach ($all_months as $m) {
                     y: {
                         beginAtZero: true,
                         ticks: {
-                            stepSize: 1,   // Forcer des ticks entiers (pas de décimales)
+                            stepSize: 1, // Forcer des ticks entiers (pas de décimales)
                             precision: 0
                         },
                         title: {
                             display: true,
                             text: 'Nombre de livres'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Mois'
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                }
+            }
+        });
+    </script>
+    <script>
+        const ctxPages = document.getElementById('chartPages').getContext('2d');
+
+        const labelsPages = <?= json_encode($labels_js) ?>;
+        const dataPages = <?= json_encode($pages_js) ?>;
+
+        new Chart(ctxPages, {
+            type: 'line',
+            data: {
+                labels: labelsPages,
+                datasets: [{
+                    label: 'Pages lues',
+                    data: dataPages,
+                    backgroundColor: 'rgba(153, 102, 255, 0.6)',
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Nombre de pages'
                         }
                     },
                     x: {

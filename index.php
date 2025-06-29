@@ -82,9 +82,9 @@ $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </head>
 
 <body class="bg-light">
-<?php if (isset($_GET['deleted']) && $_GET['deleted'] == 1): ?>
-    <div class="alert alert-success">📘 Livre supprimé avec succès.</div>
-<?php endif; ?>
+    <?php if (isset($_GET['deleted']) && $_GET['deleted'] == 1): ?>
+        <div class="alert alert-success">📘 Livre supprimé avec succès.</div>
+    <?php endif; ?>
 
     <div class="container py-4">
         <h1 class="mb-4">📚 Ma Bibliothèque</h1>
@@ -132,7 +132,11 @@ $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="mb-3">
             <a href="php/stats.php" class="btn btn-warning mb-2">📊 Stats</a>
             <a href="php/add_manual.php" class="btn btn-primary mb-2">➕ Ajout manuel</a>
-                    <a href="php/admin_book.php" class="btn btn-success mb-2">📚 Admin</a>
+            <a href="php/admin_book.php" class="btn btn-success mb-2">📚 Admin</a>
+            <button type="button" class="btn btn-info mb-2" data-bs-toggle="modal" data-bs-target="#pagesModal">
+                📖 Pages lues
+            </button>
+
         </div>
 
         <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
@@ -165,6 +169,31 @@ $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php endif; ?>
         </div>
     </div>
+    <!-- Modal Ajout Pages Lues -->
+    <div class="modal fade" id="pagesModal" tabindex="-1" aria-labelledby="pagesModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="php/pages_lu.php" class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="pagesModalLabel">Ajouter des pages lues</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="date" class="form-label">Date</label>
+                        <input type="date" class="form-control" name="date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="pages" class="form-label">Nombre de pages lues</label>
+                        <input type="number" class="form-control" name="pages" min="1" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 
