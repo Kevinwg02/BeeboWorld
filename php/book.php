@@ -179,31 +179,31 @@ if (!$book) {
                                 }
                                 ?>
                             </div>
+                            </div>
+                        <?php endif; ?>
+
+
+
                         </div>
-                    <?php endif; ?>
 
-
-
-                </div>
-
-                <!-- Actions -->
-                <div class="mt-3">
-                    <a href="../index.php" class="btn btn-primary me-2">⬅ Retour</a>
-                    <a href="update.php?id=<?= $book['ID'] ?>" class="btn btn-warning me-2">✏️ Modifier</a>
-                    <a href="?delete=<?= $book['ID'] ?>" class="btn btn-danger" onclick="return confirm('Supprimer ce livre ?')">🗑️ Supprimer</a>
+                        <!-- Actions -->
+                        <div class="mt-3">
+                            <a href="../index.php" class="btn btn-primary me-2">⬅ Retour</a>
+                            <a href="update.php?id=<?= $book['ID'] ?>" class="btn btn-warning me-2">✏️ Modifier</a>
+                            <a href="?delete=<?= $book['ID'] ?>" class="btn btn-danger" onclick="return confirm('Supprimer ce livre ?')">🗑️ Supprimer</a>
+                        </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Détails & Chronique -->
-        <div class="mt-5">
-            <div class="section-title">📝 Description</div>
-            <p><?= nl2br(htmlspecialchars($book['Details'])) ?></p>
+            <!-- Détails & Chronique -->
+            <div class="mt-5">
+                <div class="section-title">📝 Description</div>
+                <p><?= nl2br(htmlspecialchars($book['Details'])) ?></p>
 
-            <div class="section-title">📖 Chronique</div>
-            <p><?= nl2br(htmlspecialchars($book['Chronique'])) ?></p>
+                <div class="section-title">📖 Chronique</div>
+                <p><?= nl2br(htmlspecialchars($book['Chronique'])) ?></p>
+            </div>
         </div>
-    </div>
 </body>
 
 </html>

@@ -85,6 +85,7 @@ foreach ($all_months as $m) {
         <div class="mb-3">
             <a href="add_manual.php" class="btn btn-primary mb-2">➕ Ajout manuel</a>
             <a href="../index.php" class="btn btn-warning mb-2">📚 Library</a>
+            <a href="admin_book.php" class="btn btn-success mb-2">📚 Admin</a>
         </div>
 
         <h1>Statistiques de la bibliothèque</h1>

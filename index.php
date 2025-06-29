@@ -1,19 +1,29 @@
 <?php
 include 'php/connexion.php';
+
 if (isset($_GET['delete'])) {
     $deleteId = (int) $_GET['delete'];
     $stmt = $pdo->prepare("DELETE FROM library WHERE ID = ?");
     $stmt->execute([$deleteId]);
-    header('Location: library.php');
+    header('Location: index.php?deleted=1');
     exit;
 }
 
+// Récupération des localisations existantes dans la BDD
+try {
+    $stmt = $pdo->query("SELECT DISTINCT localisation FROM library WHERE localisation IS NOT NULL AND localisation != '' ORDER BY localisation ASC");
+    $localisations = $stmt->fetchAll(PDO::FETCH_COLUMN);
+} catch (PDOException $e) {
+    $localisations = [];
+}
 
 // Récupération des filtres
 $search = $_GET['search'] ?? '';
 $genreFilter = $_GET['genre'] ?? '';
 $notationFilter = $_GET['notation'] ?? '';
 $formatFilter = $_GET['format'] ?? '';
+$localisationFilter = $_GET['localisation'] ?? '';
+$etatLuFilter = $_GET['etat_lu'] ?? '';
 
 // Construction de la requête SQL dynamique
 $whereClauses = [];
@@ -41,7 +51,16 @@ if ($formatFilter) {
     $params[] = $formatFilter;
 }
 
+if ($localisationFilter) {
+    $whereClauses[] = "localisation = ?";
+    $params[] = $localisationFilter;
+}
 
+if ($etatLuFilter === 'oui') {
+    $whereClauses[] = "(Date_lecture IS NOT NULL AND Date_lecture != '0000-00-00')";
+} elseif ($etatLuFilter === 'non') {
+    $whereClauses[] = "(Date_lecture IS NULL OR Date_lecture = '0000-00-00')";
+}
 
 $whereSQL = $whereClauses ? 'WHERE ' . implode(' AND ', $whereClauses) : '';
 
@@ -51,7 +70,17 @@ $notations = $pdo->query("SELECT DISTINCT notation FROM library WHERE notation I
 $formats = $pdo->query("SELECT DISTINCT Format FROM library WHERE Format IS NOT NULL AND Format != '' ORDER BY Format")->fetchAll(PDO::FETCH_COLUMN);
 
 // Récupération des livres filtrés
-$sql = "SELECT * FROM library $whereSQL ORDER BY ID DESC";
+$sql = "
+    SELECT *, 
+           CASE 
+               WHEN Date_lecture IS NOT NULL AND Date_lecture != '0000-00-00' THEN 'oui' 
+               ELSE 'non' 
+           END AS etat_lu
+    FROM library
+    $whereSQL
+    ORDER BY ID DESC
+";
+
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -89,54 +118,61 @@ $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="container py-4">
         <h1 class="mb-4">📚 Ma Bibliothèque</h1>
 
-        <form method="GET" class="row g-3 mb-4">
-            <div class="col-md-3">
-                <input type="text" name="search" class="form-control" placeholder="Titre ou auteur..." value="<?= htmlspecialchars($search) ?>">
-            </div>
-            <div class="col-md-2">
-                <select name="genre" class="form-select">
-                    <option value="">Tous les genres</option>
-                    <?php foreach ($genres as $genre): ?>
-                        <option value="<?= htmlspecialchars($genre) ?>" <?= $genreFilter === $genre ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($genre) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <select name="notation" class="form-select">
-                    <option value="">Toutes les médailles</option>
-                    <?php foreach ($notations as $notation): ?>
-                        <option value="<?= htmlspecialchars($notation) ?>" <?= $notationFilter === $notation ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($notation) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <select name="format" class="form-select">
-                    <option value="">Tous les formats</option>
-                    <?php foreach ($formats as $format): ?>
-                        <option value="<?= htmlspecialchars($format) ?>" <?= $formatFilter === $format ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($format) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="col-md-2 d-flex gap-2">
-                <button class="btn btn-primary" type="submit">Filtrer</button>
-                <a href="<?= strtok($_SERVER["REQUEST_URI"], '?') ?>" class="btn btn-outline-secondary">Réinitialiser</a>
-            </div>
+        <form method="GET" class="d-flex flex-wrap gap-2 align-items-center mb-4">
+            <input type="text" name="search" class="form-control" placeholder="Titre ou auteur..." value="<?= htmlspecialchars($search) ?>" style="min-width: 200px;">
+
+            <select name="genre" class="form-select" style="width: 250px;">
+                <option value="">Tous les genres</option>
+                <?php foreach ($genres as $genre): ?>
+                    <option value="<?= htmlspecialchars($genre) ?>" <?= $genreFilter === $genre ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($genre) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+
+            <select name="notation" class="form-select" style="width: 250px;">
+                <option value="">Toutes les médailles</option>
+                <?php foreach ($notations as $notation): ?>
+                    <option value="<?= htmlspecialchars($notation) ?>" <?= $notationFilter === $notation ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($notation) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+
+            <select name="localisation" class="form-select" style="width: 250px;">
+                <option value="">Localisation des livres</option>
+                <?php foreach ($localisations as $loc): ?>
+                    <option value="<?= htmlspecialchars($loc) ?>" <?= $localisationFilter === $loc ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($loc) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+
+            <select name="format" class="form-select" style="width: 250px;">
+                <option value="">Tous les formats</option>
+                <?php foreach ($formats as $format): ?>
+                    <option value="<?= htmlspecialchars($format) ?>" <?= $formatFilter === $format ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($format) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+
+            <select name="etat_lu" class="form-select" style="width: 250px;">
+                <option value="">État lu</option>
+                <option value="oui" <?= $etatLuFilter === 'oui' ? 'selected' : '' ?>>Oui</option>
+                <option value="non" <?= $etatLuFilter === 'non' ? 'selected' : '' ?>>Non</option>
+            </select>
+
+            <button type="submit" class="btn btn-primary">Filtrer</button>
+            <a href="<?= strtok($_SERVER["REQUEST_URI"], '?') ?>" class="btn btn-outline-secondary">Réinitialiser</a>
         </form>
 
         <div class="mb-3">
             <a href="php/stats.php" class="btn btn-warning mb-2">📊 Stats</a>
             <a href="php/add_manual.php" class="btn btn-primary mb-2">➕ Ajout manuel</a>
-            <a href="php/admin_book.php" class="btn btn-success mb-2">📚 Admin</a>
             <button type="button" class="btn btn-info mb-2" data-bs-toggle="modal" data-bs-target="#pagesModal">
                 📖 Pages lues
             </button>
-
         </div>
 
         <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
@@ -163,12 +199,12 @@ $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         </div>
                     </div>
                 <?php endforeach; ?>
-
             <?php else: ?>
                 <p class="text-center text-muted">Aucun livre trouvé.</p>
             <?php endif; ?>
         </div>
     </div>
+
     <!-- Modal Ajout Pages Lues -->
     <div class="modal fade" id="pagesModal" tabindex="-1" aria-labelledby="pagesModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -193,8 +229,8 @@ $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </form>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

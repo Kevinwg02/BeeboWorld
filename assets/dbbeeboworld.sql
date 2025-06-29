@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1
--- Généré le : ven. 27 juin 2025 à 17:55
+-- Généré le : dim. 29 juin 2025 à 13:46
 -- Version du serveur : 10.4.32-MariaDB
 -- Version de PHP : 8.2.12
 
@@ -24,6 +24,21 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `lecture`
+--
+
+CREATE TABLE `lecture` (
+  `id` int(11) NOT NULL,
+  `livre_id` int(11) NOT NULL,
+  `date_lecture` date NOT NULL,
+  `date_relecture` date DEFAULT NULL,
+  `chronique_ecrite` enum('oui','non') DEFAULT NULL,
+  `chronique_publiee` enum('oui','non') DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `library`
 --
 
@@ -37,49 +52,80 @@ CREATE TABLE `library` (
   `ISBN` varchar(17) DEFAULT NULL,
   `Format` varchar(14) DEFAULT NULL,
   `Prix` decimal(10,2) DEFAULT NULL,
-  `Date_achat` varchar(10) DEFAULT NULL,
+  `Date_achat` date DEFAULT NULL,
   `Date_lecture` date DEFAULT NULL,
   `Relecture` date DEFAULT NULL,
   `Chronique_ecrite` varchar(30) DEFAULT NULL,
   `Chronique_publiee` varchar(30) DEFAULT NULL,
   `Details` varchar(255) DEFAULT NULL,
+  `Chronique` varchar(255) DEFAULT NULL,
   `Maison_edition` varchar(39) DEFAULT NULL,
   `Nombre_pages` varchar(4) DEFAULT NULL,
   `Notation` varchar(13) DEFAULT NULL,
   `Genre` varchar(28) DEFAULT NULL,
   `Couverture` varchar(255) DEFAULT NULL,
-  `Couple` varchar(37) DEFAULT NULL
+  `Couple` varchar(37) DEFAULT NULL,
+  `Themes` varchar(255) DEFAULT NULL,
+  `Date_achat_temp` date DEFAULT NULL,
+  `localisation` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Déchargement des données de la table `library`
 --
 
-INSERT INTO `library` (`ID`, `Auteur`, `Titre`, `Dedicace`, `Marquepages`, `Goodies`, `ISBN`, `Format`, `Prix`, `Date_achat`, `Date_lecture`, `Relecture`, `Chronique_ecrite`, `Chronique_publiee`, `Details`, `Maison_edition`, `Nombre_pages`, `Notation`, `Genre`, `Couverture`, `Couple`) VALUES
-(1, '12 mains', 'L\'amour s\'invite... noël', 'non', NULL, NULL, '978-2-298-16712-2', 'Papier', 5.00, '2021-10-12', '2022-05-31', '0000-00-00', 'Non', NULL, NULL, 'Editions France Loisirs', '273', 'Bronze', 'Romances de noël', NULL, 'Multiples'),
-(2, 'A.J. Broochmitt', 'Ces maux que nous taisons', 'oui', NULL, NULL, '978-2-755-67830-7', 'Papier', 17.00, '2025-03-08', NULL, NULL, NULL, NULL, NULL, 'Hugo Romans', '442', NULL, 'Romance contemporaine', NULL, NULL),
-(3, 'Acacia Black', 'Midnight kiss', '', NULL, NULL, '979-1-042-90092-2', 'Papier', 18.00, '2025-05-26', NULL, NULL, NULL, NULL, NULL, 'Hugo Romans', '689', NULL, 'Campus Romance', NULL, 'Nova & Cassius'),
-(4, 'Adriana Dreux', 'Mysterious R', '', NULL, NULL, '978-2-755-69193-1', 'Papier', 7.00, '2023-05-27', '2024-01-07', NULL, NULL, NULL, NULL, 'Hugo Poche', '391', 'Bronze', 'Comédie romantique', NULL, 'Angela & Andrea'),
-(5, 'AG Nevro', 'Not this time', '', NULL, NULL, '978-2-380-15655-3', 'E-book', 7.00, '2023-06-23', NULL, NULL, NULL, NULL, NULL, 'Nisha & Caetera', '528', NULL, 'Fantastic', NULL, NULL),
-(6, 'Alex Aster', 'Lightlark T1', '', '', '', '978-2-371-02370-3', 'Papier', NULL, '2023-04-01', '0000-00-00', '0000-00-00', '', '', '', 'Lumen', '600', '', 'Fantasy', NULL, ''),
-(7, 'Alex Flinn', 'Kendra Chronicles T1 VO - Beasty', '', NULL, NULL, '978-0-061-99866-9', 'Papier', 11.00, '2022-08-07', NULL, NULL, NULL, NULL, NULL, 'Harper Teen', '300', NULL, NULL, NULL, NULL),
-(8, 'Alexandra Ivy', 'Les Guardiens de l\'éternité T5', '', NULL, NULL, '978-2-811-20657-4', 'Papier', 8.00, '2019-09-15', NULL, NULL, NULL, NULL, NULL, 'Editions Milady', '465', NULL, NULL, NULL, NULL),
-(9, 'Alexandra Ivy', 'Les Gardiens de l\'éternité T1', '', NULL, NULL, '978-2-811-20512-6', 'Papier', 7.00, NULL, NULL, NULL, NULL, NULL, NULL, 'Editions Milady', '371', NULL, NULL, NULL, NULL),
-(10, 'Alexiane De Lys', 'De sang, d\'écume et de glace T1', '', NULL, NULL, '979-1-022-40577-5', 'Papier', 7.00, '2024-04-13', NULL, NULL, NULL, NULL, 'Amélie', 'Michel Lafon Poche', '624', NULL, NULL, NULL, NULL),
-(11, 'Ali Hazelwood', 'Bride', '', NULL, NULL, '978-2-811-22683-1', 'Hard back', 24.00, '2025-02-17', NULL, NULL, NULL, NULL, 'Kevin', 'Editions Milady', '442', NULL, NULL, NULL, NULL),
-(12, 'Alice Oseman', 'Solitaire T1', '', '', '', '978-2-095-02718-6', 'Hard back', 7.00, '2024-02-07', '0000-00-00', '2025-06-06', '', '', '', 'Nathan Romans', '395', 'or', '', '', ''),
-(13, 'Alice Oseman', 'Heartstopper T1', '', NULL, NULL, '978-2-017-10831-3', 'BD', 12.00, '2025-03-22', '2025-03-25', NULL, NULL, NULL, NULL, 'Hachette Romans', '269', 'Argent', 'Romance contemporaine', NULL, 'Charle & Ben'),
-(14, 'Alice Oseman', 'Deux garçons. Une rencontre', 'o', 'non', 'oui', '978-2-017-10831-3', 'Poche', 6.20, '2025-06-06', '2025-06-07', '0000-00-00', 'non', 'non', 'Vol. 1: Deux gar', 'Hachette Romans', '250', '', '', 'https://images.isbndb.com/covers/4577393482906.jpg', ''),
-(15, 'A.G. Nevro', 'Not this time - Tome 1', '', '', '', '9782380156553', 'ebook', 12.50, '2025-06-05', '2025-06-07', '0000-00-00', 'non', 'non', 'La série phénomè', 'Nisha et caetera', '327', '', 'romance', 'https://cdn.cultura.com/cdn-cgi/image/width=830/media/pim/TITELIVE/40_9782380156546_1_75.jpg', ''),
-(19, 'J.K. Rowling', 'Harry Potter et les Reliques de la mort', '', '', '', '9782075118545', 'BOOK', 0.00, '', '0000-00-00', '0000-00-00', '', '', '', 'Gallimard jeunesse', '0', '', '', '', ''),
-(20, 'Brigitte Gandiol-Coppin', 'Pierre après pierre, la cathédrale', '', '', '', '9782075112545', 'Papier', 0.00, '2025-06-02', '2025-06-03', '0000-00-00', '', '', 'Quand les cathéd', 'FeniXX', '41', '', 'Juvenile Nonfiction', 'http://books.google.com/books/content?id=bZ7_EAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api', ''),
-(21, '', 'Demon Slayer Tome 11', '', '', '', '2809489750', 'BOOK', NULL, NULL, NULL, NULL, '', '', '', 'Panini Manga', '192', NULL, '', NULL, ''),
-(22, 'Stephenie Meyer', 'The Chemist', '', '', '', '9780751567663', 'Papier', 0.00, '', '0000-00-00', '0000-00-00', '', '', 'In this gripping page-turner, an ex-agent on the run from her former employers must take one more case to clear her name and save her life. The brand-new thriller from international number one bestseller Stephenie Meyer. She used to work for the U.S. gove', 'Hachette UK', '582', '', 'Fiction', 'http://books.google.com/books/content?id=DNmxDAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api', ''),
-(23, 'Mary Wollstonecraft Shelley', 'Frankenstein', '', '', '', '9791028117993', 'BOOK', 0.00, '', '0000-00-00', '0000-00-00', '', '', '', '', '343', '', 'hard', '', '');
+INSERT INTO `library` (`ID`, `Auteur`, `Titre`, `Dedicace`, `Marquepages`, `Goodies`, `ISBN`, `Format`, `Prix`, `Date_achat`, `Date_lecture`, `Relecture`, `Chronique_ecrite`, `Chronique_publiee`, `Details`, `Chronique`, `Maison_edition`, `Nombre_pages`, `Notation`, `Genre`, `Couverture`, `Couple`, `Themes`, `Date_achat_temp`, `localisation`) VALUES
+(1, '12 mains', 'L\'amour s\'invite... noël', 'Non', 'Non', 'Non', '978-2-298-16712-2', 'Papier', 5.00, '2021-10-12', '2022-05-31', '0000-00-00', 'Non', NULL, NULL, '', 'Editions France Loisirs', '273', 'Bronze', 'Romances de noël', NULL, 'Multiples', NULL, '2021-10-12', ''),
+(2, 'A.J. Broochmitt', 'Ces maux que nous taisons', 'Non', 'Non', 'Non', '978-2-755-67830-7', 'Papier', 17.00, '2025-03-08', '2024-11-05', '2025-06-16', 'Non', 'Non', '\"La vie est comme ça. Elle ne tient qu’à un fil.\"\r\n\r\nJeune et talentueuse, Erine Peters se prépare à débuter sa deuxième année d\'internat en chirurgie. Mais un drame vient chambouler sa vie, la conduisant à quitter sa région pour le nouvel hôpital de Twin', '', 'Hugo Romans', '442', 'Bronze', 'Romance contemporaine', 'https://cdn.cultura.com/cdn-cgi/image/width=830/media/pim/TITELIVE/3_9782755678307_1_75.jpg', '', NULL, '2025-03-08', ''),
+(3, 'Acacia Black', 'Midnight Kiss', 'Non', 'Non', 'Non', '979-1-042-90092-2', 'Papier', 18.00, '2025-05-26', '2016-02-08', '0000-00-00', 'Non', 'Non', 'Une vidéo, un mensonge, une chance de tout sauver… mais à quel prix ?\r\n\r\nÀ Golden Hills University, où les relations entre athlètes sont strictement interdites, Nova et Cassius, basketteurs prometteurs que tout semble opposer, partagent un lien inattendu ', '', 'Hugo Romans', '689', 'Bronze', 'Campus Romance', 'https://static.fnac-static.com/multimedia/PE/Images/FR/NR/78/8f/1a/18517880/1540-1/tsp20250522080110/Midnight-Ki.jpg', 'Nova & Cassius', NULL, '2025-05-26', ''),
+(4, 'Adriana Dreux', 'Mysterious R', 'Non', 'Non', 'Non', '978-2-755-69193-1', 'Papier', 7.00, '2023-05-27', '2024-01-07', '2025-06-17', 'Non', 'Non', 'Angela en a marre. Les relations barbantes, elle en a fait le tour : elle veut un homme qui la fasse vibrer. Entre son goinfre de chat, sa meilleure amie un peu trop curieuse et son apollon de patron qui ne la regarde que pour critiquer son travail, elle ', '', 'Hugo Poche', '391', 'Bronze', 'Comédie romantique', 'https://cdn1.booknode.com/book_cover/4920/mysterious_r-4919900-264-432.webp', 'Angela & Andrea', NULL, '2023-05-27', ''),
+(5, 'AG Nevro', 'Not this time', 'Non', 'Non', 'Non', '978-2-380-15655-3', 'E-book', 7.00, '2023-06-23', '2025-02-02', '2025-06-17', 'Non', 'Non', 'De la haine à l\'amour, il n\'y a qu\'un pas\r\n\r\nAprès avoir sillonné les routes américaines, Ella et sa mère sont de retour à Ocean Bay, ville côtière de Californie qu’elles ont quittée un an plus tôt pour tenter d’oublier les problèmes auxquels toutes deux ', '', 'Nisha & Caetera', '528', 'Argent', 'Fantastic', 'https://cdn.cultura.com/cdn-cgi/image/width=450/media/pim/22_metadata-image-66441037.jpeg', '', NULL, '2023-06-23', ''),
+(6, 'Alex Aster', 'Lightlark T1', 'Non', 'Non', 'Non', '978-2-371-02370-3', 'Papier', NULL, '2023-04-01', '2015-06-16', '0000-00-00', '', '', '', '', 'Lumen', '600', 'Argent', 'Fantasy', NULL, '', NULL, '2023-04-01', ''),
+(9, 'Alexandra Ivy', 'Les Gardiens de l\'éternité T1', 'Non', 'Non', 'Non', '978-2-811-20512-6', 'Papier', 7.00, '2023-03-12', NULL, NULL, NULL, NULL, NULL, '', 'Editions Milady', '371', NULL, NULL, NULL, NULL, NULL, '2022-02-16', ''),
+(10, 'Alexiane De Lys', 'De sang, d\'écume et de glace T1', 'Non', 'Non', 'Non', '979-1-022-40577-5', 'Papier', 7.00, '2024-04-13', '2025-08-09', '2025-06-16', 'Non', 'Non', 'La perspective de passer ce qui pourrait être son dernier été loin de chez elle n\'enchante pas vraiment Perséphone. La jeune fille atteinte d\'une mystérieuse maladie qui l\'affaiblit de jour en jour se retrouve coincée dans le Finistère, chez une tante exc', '', 'Michel Lafon Poche', '624', 'Bronze', 'Romance', 'https://cdn1.booknode.com/book_cover/1483/full/de-sang-decume-et-de-glace-tome-1-metamorphose-1482868.jpg', '', NULL, '2024-04-13', ''),
+(11, 'Ali Hazelwood', 'Bride', 'Non', 'Non', 'Non', '978-2-811-22683-1', 'Hard back', 24.00, '2025-02-17', '0000-00-00', '0000-00-00', 'Non', 'Non', 'Misery Lark, la fille unique du conseiller vampyre le plus puissant du Sud-Ouest, est une paria... de nouveau. Les jours où elle vivait dans l\'anonymat parmi les humains sont désormais derrière elle : on a fait appel à elle pour renforcer une alliance his', '', 'Editions Milady', '442', '', '', 'https://cdn.cultura.com/cdn-cgi/image/width=830/media/pim/TITELIVE/30_9782811226831_1_75.jpg', '', NULL, '2025-02-17', ''),
+(12, 'Alice Oseman', 'Solitaire T1', 'Non', 'Non', 'Non', '978-2-095-02718-6', 'Hard back', 7.00, '2024-02-07', '2016-03-09', '2025-06-06', 'Oui', 'Non', 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has su', '', 'Nathan Romans', '395', 'Or', '', 'https://static.fnac-static.com/multimedia/PE/Images/FR/NR/0f/5a/00/16800271/1540-1/tsp20250412072704/SOLITAIRE.jpg', '', NULL, '2024-02-07', ''),
+(13, 'Alice Oseman', 'Heartstopper T1', 'Non', 'Non', 'Non', '978-2-017-10831-3', 'BD', 12.00, '2025-03-22', '2025-03-25', '2025-06-27', 'Non', 'Non', 'description heartstopperdescription heartstopperdescription heartstopperdescription heartstopper', '', 'Hachette Romans', '269', 'Argent', 'Romance contemporaine', 'https://img.chasse-aux-livres.fr/v7/_zmx1_/51OCz3XzlVL.jpg?w=230&h=250&func=fit&bg_opacity=0', 'Charle & Ben', NULL, '2025-03-22', ''),
+(15, 'A.G. Nevro', 'Not this time - Tome 1', 'Non', 'Non', 'Non', '9782380156553', 'E-book', 12.50, '2025-01-05', '2025-01-07', '2025-06-28', '', '', 'La série phénomè', '', 'Nisha et caetera', '327', 'Or', 'romance', 'https://cdn.cultura.com/cdn-cgi/image/width=830/media/pim/TITELIVE/40_9782380156546_1_75.jpg', '', NULL, '2025-01-05', ''),
+(22, 'Stephenie Meyer', 'The Chemist', 'Non', 'Non', 'Non', '9780751567663', 'Papier', 5.00, '2025-06-09', '2024-03-12', '2025-06-29', 'Non', 'Non', 'In this gripping page-turner, an ex-agent on the run from her former employers must take one more case to clear her name and save her life. The brand-new thriller from international number one bestseller Stephenie Meyer. She used to work for the U.S. gove', '', 'Hachette UK', '582', 'Argent', 'Fiction', 'http://books.google.com/books/content?id=DNmxDAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api', '', NULL, '2025-06-09', 'Bibliothèque'),
+(29, 'Rebecca Yarros', 'Onyx Storm', 'Non', 'Non', 'Non', '9782755673104', 'Hard back', 0.00, '2024-01-18', '2025-06-27', '2022-05-10', 'Oui', 'Non', 'AFFRONTER LES TÉNÈBRES La guerre prend un tournant massif mais le plus grand risque vient désormais de l\'intérieur. Plus amoureuse que jamais, Violet est bien décidée à affronter les ténèbres.', 'Chronique: AFFRONTER LES TÉNÈBRES La guerre prend un tournant massif mais le plus grand risque vient désormais de l\'intérieur. Plus amoureuse que jamais, Violet est bien décidée à affronter les ténèbres.', 'Hugo Roman', '766', 'Diamant', 'Fiction', 'http://books.google.com/books/content?id=-yU9EQAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api', 'Xaden & Violet', NULL, '2024-01-18', ''),
+(30, 'Rebecca Yarros', 'Onyx Storm', 'Non', 'Non', 'Non', '9789510514993', 'Hard back', 0.00, '2022-06-09', '2025-02-10', '2017-04-02', '', '', 'Brave the dark. Get ready to fly or die in the breathtaking follow-up to Fourth Wing and Iron Flame from the no. 1 Sunday Times and New York Times bestselling author Rebecca Yarros. Returning to the richly imagined world of Fourth Wing and Iron Flame, the', '', 'WSOY', '626', 'J\'ai lu aussi', 'Fiction', 'http://books.google.com/books/content?id=cYwdEQAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api', '', NULL, '2022-06-09', '');
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `nb_page_lu`
+--
+
+CREATE TABLE `nb_page_lu` (
+  `id` int(11) NOT NULL,
+  `date` date NOT NULL,
+  `pages` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Déchargement des données de la table `nb_page_lu`
+--
+
+INSERT INTO `nb_page_lu` (`id`, `date`, `pages`) VALUES
+(1, '2025-06-28', 185),
+(2, '2024-06-28', 135),
+(3, '2025-02-27', 250),
+(4, '2025-03-26', 150),
+(5, '2025-05-25', 145),
+(6, '2025-06-24', 160),
+(7, '2025-06-17', 50);
 
 --
 -- Index pour les tables déchargées
 --
+
+--
+-- Index pour la table `lecture`
+--
+ALTER TABLE `lecture`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `livre_id` (`livre_id`);
 
 --
 -- Index pour la table `library`
@@ -88,14 +134,42 @@ ALTER TABLE `library`
   ADD PRIMARY KEY (`ID`);
 
 --
+-- Index pour la table `nb_page_lu`
+--
+ALTER TABLE `nb_page_lu`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- AUTO_INCREMENT pour les tables déchargées
 --
+
+--
+-- AUTO_INCREMENT pour la table `lecture`
+--
+ALTER TABLE `lecture`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `library`
 --
 ALTER TABLE `library`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+
+--
+-- AUTO_INCREMENT pour la table `nb_page_lu`
+--
+ALTER TABLE `nb_page_lu`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- Contraintes pour les tables déchargées
+--
+
+--
+-- Contraintes pour la table `lecture`
+--
+ALTER TABLE `lecture`
+  ADD CONSTRAINT `lecture_ibfk_1` FOREIGN KEY (`livre_id`) REFERENCES `library` (`ID`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
