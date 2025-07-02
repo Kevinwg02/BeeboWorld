@@ -1,11 +1,17 @@
 <?php
+session_start();
+if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
+    header('Location: ../index.php');  // ← corrige bien le chemin
+    exit;
+}
+
 include 'connexion.php';
 
 // Suppression
 if (isset($_GET['delete'])) {
     $deleteId = (int) $_GET['delete'];
     $pdo->prepare("DELETE FROM library WHERE ID = ?")->execute([$deleteId]);
-    header("Location: ../index.php?deleted=1");
+    header("Location: library.php?deleted=1");
     exit;
 }
 
@@ -59,7 +65,7 @@ if (!$book) {
 
 <body class="bg-light">
     <div class="container py-4">
-        <a href="../index.php" class="btn btn-warning mb-3">📚 Library</a>
+        <a href="library.php" class="btn btn-warning mb-3">📚 Library</a>
         <a href="add_manual.php" class="btn btn-primary mb-3">➕ Ajout manuel</a>
         <h1 class="mb-4"><?= htmlspecialchars($book['Titre']) ?></h1>
         <div class="row">
@@ -174,9 +180,7 @@ if (!$book) {
                                     !empty($book['Chronique']) &&
                                     strtolower($book['Chronique_ecrite']) === 'oui' &&
                                     strtolower($book['Chronique_publiee']) !== 'non'
-                                ) {
-                                    echo "<div class='col-12 mt-3'><span class='label'>📝 Chronique :</span><br><div class='value border p-2 rounded bg-white'>" . nl2br(htmlspecialchars($book['Chronique'])) . "</div></div>";
-                                }
+                                ) 
                                 ?>
                             </div>
                             </div>
@@ -188,7 +192,7 @@ if (!$book) {
 
                         <!-- Actions -->
                         <div class="mt-3">
-                            <a href="../index.php" class="btn btn-primary me-2">⬅ Retour</a>
+                            <a href="library.php" class="btn btn-primary me-2">⬅ Retour</a>
                             <a href="update.php?id=<?= $book['ID'] ?>" class="btn btn-warning me-2">✏️ Modifier</a>
                             <a href="?delete=<?= $book['ID'] ?>" class="btn btn-danger" onclick="return confirm('Supprimer ce livre ?')">🗑️ Supprimer</a>
                         </div>
@@ -197,7 +201,7 @@ if (!$book) {
 
             <!-- Détails & Chronique -->
             <div class="mt-5">
-                <div class="section-title">📝 Description</div>
+                <div class="section-title">📝 Résumé</div>
                 <p><?= nl2br(htmlspecialchars($book['Details'])) ?></p>
 
                 <div class="section-title">📖 Chronique</div>

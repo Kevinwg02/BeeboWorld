@@ -1,25 +1,31 @@
 <?php
+session_start();
+if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
+    header('Location: ../index.php');  // ← corrige bien le chemin
+    exit;
+}
+
 include 'connexion.php';
 
 // Statistiques globales avec filtre "bibliotheque"
 $annee_actuelle = date('Y');
 
 // Livres lus cette année
-$stmt = $pdo->prepare("SELECT COUNT(*) FROM library WHERE YEAR(Date_lecture) = ? AND localisation = 'bibliotheque'");
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM library WHERE YEAR(Date_lecture) = ? AND localisation = 'Bibliothèque physique'");
 $stmt->execute([$annee_actuelle]);
 $nb_lus_annee = $stmt->fetchColumn();
 
 // Livres achetés cette année
-$stmt = $pdo->prepare("SELECT COUNT(*) FROM library WHERE YEAR(Date_achat) = ? AND localisation = 'bibliotheque'");
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM library WHERE YEAR(Date_achat) = ? AND localisation = 'Bibliothèque physique'");
 $stmt->execute([$annee_actuelle]);
 $nb_achetes_annee = $stmt->fetchColumn();
 
 // Nombre total de livres dans la bibliothèque
-$stmt = $pdo->query("SELECT COUNT(*) FROM library WHERE localisation = 'bibliotheque'");
+$stmt = $pdo->query("SELECT COUNT(*) FROM library WHERE localisation = 'Bibliothèque physique'");
 $nb_total_biblio = $stmt->fetchColumn();
 
 // Somme totale des prix
-$stmt = $pdo->query("SELECT SUM(Prix) FROM library WHERE Prix IS NOT NULL AND localisation = 'bibliotheque'");
+$stmt = $pdo->query("SELECT SUM(Prix) FROM library WHERE Prix IS NOT NULL AND localisation = 'Bibliothèque physique'");
 $prix_total = $stmt->fetchColumn();
 
 
@@ -106,7 +112,7 @@ foreach ($all_months as $m) {
     <div class="container py-4">
         <div class="mb-3">
             <a href="add_manual.php" class="btn btn-primary mb-2">➕ Ajout manuel</a>
-            <a href="../index.php" class="btn btn-warning mb-2">📚 Library</a>
+            <a href="library.php" class="btn btn-warning mb-2">📚 Library</a>
             <a href="admin_book.php" class="btn btn-success mb-2">📚 Admin</a>
         </div>
 
@@ -197,7 +203,7 @@ foreach ($all_months as $m) {
             </div>
         </div>
 
-        <a href="../index.php" class="btn btn-primary mt-3">⬅ Retour à la bibliothèque</a>
+        <a href="library.php" class="btn btn-primary mt-3">⬅ Retour à la bibliothèque</a>
     </div>
 
     <script>
@@ -245,7 +251,7 @@ foreach ($all_months as $m) {
                     }
                 },
                 interaction: {
-                    mode: 'index',
+                    mode: 'library',
                     intersect: false
                 }
             }
@@ -285,11 +291,14 @@ foreach ($all_months as $m) {
                     }
                 },
                 interaction: {
-                    mode: 'index',
+                    mode: 'library',
                     intersect: false
                 }
             }
         });
+        console.log('Max livres achetés:', Math.max(...dataAchats));
+        console.log('Max livres lus:', Math.max(...dataLectures));
+        console.log('Nb pages lus:', Math.max(...dataPages));
     </script>
 
 </body>

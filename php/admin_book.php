@@ -1,7 +1,13 @@
 <?php
+session_start();
+if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
+    header('Location: ../index.php');
+    exit;
+}
+
 include 'connexion.php';
 
-// Suppression
+// Suppression livre
 if (isset($_GET['delete'])) {
   $deleteId = (int) $_GET['delete'];
   $pdo->prepare("DELETE FROM library WHERE ID = ?")->execute([$deleteId]);
@@ -9,11 +15,19 @@ if (isset($_GET['delete'])) {
   exit;
 }
 
-// Filtres
+// Suppression pages lues
+if (isset($_GET['delete_page'])) {
+    $deletePageId = (int) $_GET['delete_page'];
+    $pdo->prepare("DELETE FROM nb_page_lu WHERE id = ?")->execute([$deletePageId]);
+    header("Location: admin_book.php?success_page_delete=1");
+    exit;
+}
+
+// Filtres livres
 $search = $_GET['search'] ?? '';
 $genreFilter = $_GET['genre'] ?? '';
-$notationFilter = $_GET['notation'] ?? '';  // <-- nouveau filtre
-$formatFilter = $_GET['format'] ?? '';  // <-- nouveau filtre
+$notationFilter = $_GET['notation'] ?? '';
+$formatFilter = $_GET['format'] ?? '';
 
 $whereClauses = [];
 $params = [];
@@ -29,54 +43,57 @@ if ($genreFilter) {
   $params[] = $genreFilter;
 }
 if ($notationFilter) {
-  $whereClauses[] = "notation = ?";  // <-- filtre médaille
+  $whereClauses[] = "notation = ?";
   $params[] = $notationFilter;
 }
 if ($formatFilter) {
-  $whereClauses[] = "Format = ?";  // <-- filtre format
+  $whereClauses[] = "Format = ?";
   $params[] = $formatFilter;
 }
 
 $whereSQL = $whereClauses ? ('WHERE ' . implode(' AND ', $whereClauses)) : '';
 
-// Récupération des livres
 $sql = "SELECT * FROM library $whereSQL ORDER BY ID DESC";
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Liste des genres
 $genres = $pdo->query("SELECT DISTINCT Genre FROM library WHERE Genre IS NOT NULL AND Genre != '' ORDER BY Genre")->fetchAll(PDO::FETCH_COLUMN);
-
-// Liste des médailles (distinctes et valides)
 $notations = $pdo->query("SELECT DISTINCT notation FROM library WHERE notation IS NOT NULL AND notation != '' ORDER BY notation")->fetchAll(PDO::FETCH_COLUMN);
+$formats = $pdo->query("SELECT DISTINCT Format FROM library WHERE Format IS NOT NULL AND Format != '' ORDER BY Format")->fetchAll(PDO::FETCH_COLUMN);
 
-// Liste des format (distinctes et valides) 
-$format = $pdo->query("SELECT DISTINCT Format FROM library WHERE Format IS NOT NULL AND Format != '' ORDER BY Format")->fetchAll(PDO::FETCH_COLUMN);
+// Récupération des pages lues
+$sql_pages = "SELECT * FROM nb_page_lu ORDER BY date DESC";
+$stmt_pages = $pdo->prepare($sql_pages);
+$stmt_pages->execute();
+$pages_lues = $stmt_pages->fetchAll(PDO::FETCH_ASSOC);
 ?>
-
 
 <!DOCTYPE html>
 <html lang="fr">
 
 <head>
-  <meta charset="UTF-8">
-  <link rel="shortcut icon" href="../assets/favicon.ico" type="image/x-icon">
+  <meta charset="UTF-8" />
+  <link rel="shortcut icon" href="../assets/favicon.ico" type="image/x-icon" />
   <title>Admin - Gestion complète de la bibliothèque</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="../css/themes.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/themes.css" />
 </head>
 
 <body class="bg-light">
   <div class="container-fluid py-4">
     <h1 class="mb-4">📚 Administration complète des livres</h1>
-    <a href="../index.php" class="btn btn-warning mb-3">📚 Library</a>
+    <a href="library.php" class="btn btn-warning mb-3">📚 Library</a>
     <a href="stats.php" class="btn btn-primary mb-3">📊 Stats</a>
     <a href="add_manual.php" class="btn btn-success mb-3">➕ Ajout manuel</a>
 
+    <button type="button" class="btn btn-info mb-3" data-bs-toggle="modal" data-bs-target="#pagesLuesModal">
+      📖 Pages lues
+    </button>
+
     <form method="GET" class="row g-3 mb-4">
       <div class="col-md-3">
-        <input type="text" name="search" class="form-control" placeholder="Titre ou auteur..." value="<?= htmlspecialchars($search) ?>">
+        <input type="text" name="search" class="form-control" placeholder="Titre ou auteur..." value="<?= htmlspecialchars($search) ?>" />
       </div>
       <div class="col-md-3">
         <select name="genre" class="form-select">
@@ -100,8 +117,8 @@ $format = $pdo->query("SELECT DISTINCT Format FROM library WHERE Format IS NOT N
       </div>
       <div class="col-md-3">
         <select name="format" class="form-select">
-          <option value="">Toutes les format</option>
-          <?php foreach ($format as $format): ?>
+          <option value="">Tous les formats</option>
+          <?php foreach ($formats as $format): ?>
             <option value="<?= htmlspecialchars($format) ?>" <?= $formatFilter === $format ? 'selected' : '' ?>>
               <?= htmlspecialchars($format) ?>
             </option>
@@ -115,6 +132,10 @@ $format = $pdo->query("SELECT DISTINCT Format FROM library WHERE Format IS NOT N
 
     <?php if (isset($_GET['success'])): ?>
       <div class="alert alert-success">Livre supprimé avec succès.</div>
+    <?php endif; ?>
+
+    <?php if (isset($_GET['success_page_delete'])): ?>
+      <div class="alert alert-success">Entrée de pages lues supprimée avec succès.</div>
     <?php endif; ?>
 
     <div class="table-responsive">
@@ -135,16 +156,15 @@ $format = $pdo->query("SELECT DISTINCT Format FROM library WHERE Format IS NOT N
               <?php foreach ($book as $key => $value): ?>
                 <td>
                   <?php
-                  if ($key === 'Details') {
-                    $text = strip_tags($value ?? '');
-                    echo htmlspecialchars(mb_strimwidth($text, 0, 100, '...'));
-                  } else {
-                    echo htmlspecialchars($value ?? '');
-                  }
+                    if ($key === 'Details') {
+                      $text = strip_tags($value ?? '');
+                      echo htmlspecialchars(mb_strimwidth($text, 0, 100, '...'));
+                    } else {
+                      echo htmlspecialchars($value ?? '');
+                    }
                   ?>
                 </td>
               <?php endforeach; ?>
-
               <td style="white-space: nowrap;">
                 <a href="update.php?id=<?= $book['ID'] ?>" class="btn btn-sm btn-warning">Modifier</a>
                 <a href="?delete=<?= $book['ID'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Supprimer ce livre ?')">Supprimer</a>
@@ -159,7 +179,58 @@ $format = $pdo->query("SELECT DISTINCT Format FROM library WHERE Format IS NOT N
         </tbody>
       </table>
     </div>
+
+    <!-- Modal Pages lues -->
+    <div class="modal fade" id="pagesLuesModal" tabindex="-1" aria-labelledby="pagesLuesModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="pagesLuesModalLabel">📖 Gestion des pages lues</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+          </div>
+          <div class="modal-body">
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover bg-white table-sm">
+                <thead class="table-light">
+                  <tr>
+                    <?php if (!empty($pages_lues)): ?>
+                      <?php foreach (array_keys($pages_lues[0]) as $column): ?>
+                        <th><?= htmlspecialchars($column) ?></th>
+                      <?php endforeach; ?>
+                    <?php endif; ?>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <?php foreach ($pages_lues as $page): ?>
+                    <tr>
+                      <?php foreach ($page as $key => $value): ?>
+                        <td><?= htmlspecialchars($value ?? '') ?></td>
+                      <?php endforeach; ?>
+                      <td style="white-space: nowrap;">
+                        <a href="update_pages.php?id=<?= $page['id'] ?>" class="btn btn-sm btn-warning">Modifier</a>
+                        <a href="?delete_page=<?= $page['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Supprimer cette entrée de pages lues ?')">Supprimer</a>
+                      </td>
+                    </tr>
+                  <?php endforeach; ?>
+                  <?php if (empty($pages_lues)): ?>
+                    <tr>
+                      <td colspan="100" class="text-center text-muted">Aucune donnée de pages lues.</td>
+                    </tr>
+                  <?php endif; ?>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

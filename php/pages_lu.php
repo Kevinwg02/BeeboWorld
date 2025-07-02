@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$date, $pages]);
     }
 
-    header("Location: ../index.php");
+    header("Location: library.php");
     exit;
 }
 ?>

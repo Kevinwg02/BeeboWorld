@@ -1,4 +1,10 @@
 <?php
+session_start();
+if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
+    header('Location: ../index.php');
+    exit;
+}
+
 include 'connexion.php';
 
 $id = $_GET['id'] ?? null;
@@ -8,30 +14,23 @@ if (!$id) {
     die("ID de livre manquant.");
 }
 
-// Charger notations existantes
-try {
-    $stmt = $pdo->query("SELECT DISTINCT Notation FROM library WHERE Notation IS NOT NULL AND Notation != '' ORDER BY Notation ASC");
-    $notations = $stmt->fetchAll(PDO::FETCH_COLUMN);
-} catch (PDOException $e) {
-    $notations = [];
+// Récupération des données uniques
+function fetchDistinctValues($pdo, $column)
+{
+    try {
+        $stmt = $pdo->query("SELECT DISTINCT `$column` FROM library WHERE `$column` IS NOT NULL AND `$column` != '' ORDER BY `$column` ASC");
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    } catch (PDOException $e) {
+        return [];
+    }
 }
 
-// Récupération des localisation existants dans la BDD
-try {
-    $stmt = $pdo->query("SELECT DISTINCT localisation FROM library WHERE localisation IS NOT NULL AND localisation != '' ORDER BY localisation ASC");
-    $localisation = $stmt->fetchAll(PDO::FETCH_COLUMN);
-} catch (PDOException $e) {
-    $localisation = [];
-}
-// Récupération des genres existants dans la BDD
-try {
-    $stmt = $pdo->query("SELECT DISTINCT localisation FROM library WHERE localisation IS NOT NULL AND localisation != '' ORDER BY localisation ASC");
-    $localisation = $stmt->fetchAll(PDO::FETCH_COLUMN);
-} catch (PDOException $e) {
-    $localisation = [];
-}
+$notations = fetchDistinctValues($pdo, 'Notation');
+$localisations = fetchDistinctValues($pdo, 'localisation');
+$genres = fetchDistinctValues($pdo, 'Genre');
+$formats = fetchDistinctValues($pdo, 'Format');
 
-// Récupérer le livre
+// Charger le livre existant
 $stmt = $pdo->prepare("SELECT * FROM library WHERE ID = ?");
 $stmt->execute([$id]);
 $book = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -40,44 +39,30 @@ if (!$book) {
     die("Livre introuvable.");
 }
 
-// Champs à gérer
+// Champs gérés
 $fields = [
-    'Auteur',
-    'Titre',
-    'Dedicace',
-    'Marquepages',
-    'Goodies',
-    'ISBN',
-    'Format',
-    'Prix',
-    'Date_achat',
-    'Date_lecture',
-    'Relecture',
-    'Chronique_ecrite',
-    'Chronique_publiee',
-    'Details',
-    'Maison_edition',
-    'Nombre_pages',
-    'Notation',
-    'Genre',
-    'Couple',
-    'Couverture',
-    'localisation',
+    'Auteur', 'Titre', 'Dedicace', 'Marquepages', 'Goodies', 'ISBN', 'Format', 'Prix',
+    'Date_achat', 'Date_lecture', 'Relecture', 'Chronique_ecrite', 'Chronique_publiee',
+    'Details', 'Chronique', 'Maison_edition', 'Nombre_pages', 'Notation', 'Genre',
+    'Themes', 'Couple', 'Couverture', 'localisation'
 ];
 
-
-
-// Traitement formulaire
+// Traitement du formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = [];
     foreach ($fields as $field) {
         $value = $_POST[$field] ?? null;
-        if (in_array($field, ['Nombre_pages'])) {
-            $value = $value === '' ? null : (int)$value;
+
+        if ($field === 'Nombre_pages') {
+            $value = ($value === '') ? null : (int)$value;
+        } elseif ($field === 'Prix') {
+            $value = ($value === '') ? null : (float)$value;
+        } elseif ($field === 'Couverture') {
+            if (empty($value)) {
+                $value = $book['Couverture'] ?: '../assets/covers/TheAdventureOfBeebo.jpg';
+            }
         }
-        if (in_array($field, ['Prix'])) {
-            $value = $value === '' ? null : (float)$value;
-        }
+
         $data[$field] = $value;
     }
 
@@ -88,60 +73,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $message = "Livre mis à jour avec succès.";
 
-    // Recharger les données
     $stmt = $pdo->prepare("SELECT * FROM library WHERE ID = ?");
     $stmt->execute([$id]);
     $book = $stmt->fetch(PDO::FETCH_ASSOC);
-}
-
-// Fonctions input
-function input($label, $name, $type = 'text', $size = 6)
-{
-    global $book;
-    $value = htmlspecialchars($book[$name] ?? '');
-    echo "<div class='col-md-$size'>
-        <label class='form-label'>$label</label>
-        <input type='$type' name='$name' class='form-control' value=\"$value\">
-    </div>";
-}
-
-function textarea($label, $name, $rows = 3, $size = 12)
-{
-    global $book;
-    $value = htmlspecialchars($book[$name] ?? '');
-    echo "<div class='col-md-$size'>
-        <label class='form-label'>$label</label>
-        <textarea name='$name' class='form-control' rows='$rows'>$value</textarea>
-    </div>";
-}
-
-function selectOuiNon($label, $name, $size = 6)
-{
-    global $book;
-    $value = $book[$name] ?? '';
-    echo "<div class='col-md-$size'>
-        <label class='form-label'>$label</label>
-        <select name='$name' class='form-select'>
-            <option value=''>--</option>
-            <option value='Oui'" . ($value === 'Oui' ? ' selected' : '') . ">Oui</option>
-            <option value='Non'" . ($value === 'Non' ? ' selected' : '') . ">Non</option>
-        </select>
-    </div>";
-}
-
-function selectNotation($label, $name, $notations, $size = 6)
-{
-    global $book;
-    $value = $book[$name] ?? '';
-    echo "<div class='col-md-$size'>
-        <label class='form-label'>$label</label>
-        <select name='$name' class='form-select'>
-            <option value=''>-- Choisir une médaille --</option>";
-    foreach ($notations as $note) {
-        $selected = ($note === $value) ? 'selected' : '';
-        echo "<option value=\"" . htmlspecialchars($note) . "\" $selected>" . htmlspecialchars($note) . "</option>";
-    }
-    echo "</select></div>";
 }
 ?>
 
@@ -158,23 +92,60 @@ function selectNotation($label, $name, $notations, $size = 6)
 <body class="bg-light">
     <div class="container py-5">
         <h1 class="mb-4">✏️ Modifier un livre</h1>
+        <a href="admin_book.php" class="btn btn-success mb-3">📚 Voir la bibliothèque (admin)</a>
+        <a href="library.php" class="btn btn-warning mb-3">📚 Library</a>
 
-        <a href="/php/admin_book.php" class="btn btn-success mb-4">📚 Voir la bibliothèque (admin)</a>
-        <a href="../index.php" class="btn btn-warning mb-4">📚 Library</a>
         <?php if ($message): ?>
             <div class="alert alert-success"><?= htmlspecialchars($message) ?></div>
-
         <?php endif; ?>
 
         <form method="POST" class="row g-3">
             <?php
+            function input($label, $name, $type = 'text', $size = 6, $list = null)
+            {
+                global $book;
+                $value = $book[$name] ?? '';
+                if ($name === 'Couverture' && empty($value)) {
+                    $value = '../assets/covers/TheAdventureOfBeebo.jpg';
+                }
+                $value = htmlspecialchars($value);
+                echo "<div class='col-md-$size'>
+                    <label class='form-label'>$label</label>
+                    <input type='$type' name='$name' class='form-control' value=\"$value\"" . ($list ? " list=\"$list\"" : "") . ">
+                </div>";
+            }
+
+            function textarea($label, $name, $rows = 3, $size = 12)
+            {
+                global $book;
+                $value = htmlspecialchars($book[$name] ?? '');
+                echo "<div class='col-md-$size'>
+                        <label class='form-label'>$label</label>
+                        <textarea name='$name' class='form-control' rows='$rows'>$value</textarea>
+                      </div>";
+            }
+
+            function selectOuiNon($label, $name, $size = 6)
+            {
+                global $book;
+                $value = $book[$name] ?? '';
+                echo "<div class='col-md-$size'>
+                        <label class='form-label'>$label</label>
+                        <select name='$name' class='form-select'>
+                            <option value=''>--</option>
+                            <option value='Oui'" . ($value === 'Oui' ? ' selected' : '') . ">Oui</option>
+                            <option value='Non'" . ($value === 'Non' ? ' selected' : '') . ">Non</option>
+                        </select>
+                      </div>";
+            }
+
             input('Titre', 'Titre');
             input('Auteur', 'Auteur');
             input('ISBN', 'ISBN', 'text', 4);
             selectOuiNon('Dédicace', 'Dedicace', 4);
             selectOuiNon('Marque-pages', 'Marquepages', 4);
             selectOuiNon('Goodies', 'Goodies', 6);
-            input('Format', 'Format', 'text', 4);
+            input('Format', 'Format', 'text', 4, 'format-list');
             input('Prix (€)', 'Prix', 'text', 4);
             input("Date d'achat", 'Date_achat', 'date', 6);
             input("Date de lecture", 'Date_lecture', 'date', 6);
@@ -183,20 +154,49 @@ function selectNotation($label, $name, $notations, $size = 6)
             selectOuiNon('Chronique publiée', 'Chronique_publiee', 6);
             input("Maison d'édition", 'Maison_edition', 'text', 6);
             input("Nombre de pages", 'Nombre_pages', 'number', 3);
-            input("Genre", 'Genre', 'text', 3);
-            input("localisation", 'localisation');
-            selectNotation("Notation", 'Notation', $notations, 4);
-            input("Couple", 'Couple', 'text', 4);
-            input("Image (URL de couverture)", 'Couverture', 'text', 4);
-            textarea("Description", 'Details');
-            textarea("Chronique", 'Chronique');
-            textarea("Themes", 'Themes');
+            input("Genre", 'Genre', 'text', 3, 'genre-list');
+            input("localisation", 'localisation', 'text', 3, 'localisation-list');
 
+            echo "<div class='col-md-3'>
+                    <label class='form-label'>Notation</label>
+                    <input type='text' name='Notation' class='form-control' value=\"" . htmlspecialchars($book['Notation'] ?? '') . "\" list='notation-list'>
+                  </div>";
+
+            input("Couple", 'Couple', 'text', 3);
+            input("Themes", 'Themes', 'text', 3);
+            input("Image (URL de couverture)", 'Couverture', 'text', 6);
+            textarea("Résumé", 'Details');
+            textarea("Chronique", 'Chronique');
             ?>
             <div class="col-12 text-end mt-4">
                 <button type="submit" class="btn btn-success mb-3">💾 Enregistrer</button>
-                <a href="../index.php" class="btn btn-primary mb-3">📚 Library</a>
+                <a href="book.php?id=<?= htmlspecialchars($id) ?>" class="btn btn-primary mb-3">📖 Retour sur le livre</a>
             </div>
+
+            <!-- DATALISTS -->
+            <datalist id="notation-list">
+                <?php foreach ($notations as $val): ?>
+                    <option value="<?= htmlspecialchars($val) ?>">
+                <?php endforeach; ?>
+            </datalist>
+
+            <datalist id="localisation-list">
+                <?php foreach ($localisations as $val): ?>
+                    <option value="<?= htmlspecialchars($val) ?>">
+                <?php endforeach; ?>
+            </datalist>
+
+            <datalist id="genre-list">
+                <?php foreach ($genres as $val): ?>
+                    <option value="<?= htmlspecialchars($val) ?>">
+                <?php endforeach; ?>
+            </datalist>
+
+            <datalist id="format-list">
+                <?php foreach ($formats as $val): ?>
+                    <option value="<?= htmlspecialchars($val) ?>">
+                <?php endforeach; ?>
+            </datalist>
         </form>
     </div>
 </body>

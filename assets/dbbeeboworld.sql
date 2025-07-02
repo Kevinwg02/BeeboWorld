@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1
--- Généré le : dim. 29 juin 2025 à 13:46
+-- Généré le : mer. 02 juil. 2025 à 10:58
 -- Version du serveur : 10.4.32-MariaDB
 -- Version de PHP : 8.2.12
 
@@ -50,23 +50,22 @@ CREATE TABLE `library` (
   `Marquepages` varchar(30) DEFAULT NULL,
   `Goodies` varchar(30) DEFAULT NULL,
   `ISBN` varchar(17) DEFAULT NULL,
-  `Format` varchar(14) DEFAULT NULL,
+  `Format` varchar(50) DEFAULT NULL,
   `Prix` decimal(10,2) DEFAULT NULL,
   `Date_achat` date DEFAULT NULL,
   `Date_lecture` date DEFAULT NULL,
   `Relecture` date DEFAULT NULL,
   `Chronique_ecrite` varchar(30) DEFAULT NULL,
   `Chronique_publiee` varchar(30) DEFAULT NULL,
-  `Details` varchar(255) DEFAULT NULL,
-  `Chronique` varchar(255) DEFAULT NULL,
+  `Details` text DEFAULT NULL,
+  `Chronique` text DEFAULT NULL,
   `Maison_edition` varchar(39) DEFAULT NULL,
   `Nombre_pages` varchar(4) DEFAULT NULL,
   `Notation` varchar(13) DEFAULT NULL,
   `Genre` varchar(28) DEFAULT NULL,
-  `Couverture` varchar(255) DEFAULT NULL,
-  `Couple` varchar(37) DEFAULT NULL,
+  `Couverture` varchar(255) DEFAULT '../assets/covers/TheAdventureOfBeebo.jpg',
+  `Couple` varchar(255) DEFAULT NULL,
   `Themes` varchar(255) DEFAULT NULL,
-  `Date_achat_temp` date DEFAULT NULL,
   `localisation` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -74,22 +73,9 @@ CREATE TABLE `library` (
 -- Déchargement des données de la table `library`
 --
 
-INSERT INTO `library` (`ID`, `Auteur`, `Titre`, `Dedicace`, `Marquepages`, `Goodies`, `ISBN`, `Format`, `Prix`, `Date_achat`, `Date_lecture`, `Relecture`, `Chronique_ecrite`, `Chronique_publiee`, `Details`, `Chronique`, `Maison_edition`, `Nombre_pages`, `Notation`, `Genre`, `Couverture`, `Couple`, `Themes`, `Date_achat_temp`, `localisation`) VALUES
-(1, '12 mains', 'L\'amour s\'invite... noël', 'Non', 'Non', 'Non', '978-2-298-16712-2', 'Papier', 5.00, '2021-10-12', '2022-05-31', '0000-00-00', 'Non', NULL, NULL, '', 'Editions France Loisirs', '273', 'Bronze', 'Romances de noël', NULL, 'Multiples', NULL, '2021-10-12', ''),
-(2, 'A.J. Broochmitt', 'Ces maux que nous taisons', 'Non', 'Non', 'Non', '978-2-755-67830-7', 'Papier', 17.00, '2025-03-08', '2024-11-05', '2025-06-16', 'Non', 'Non', '\"La vie est comme ça. Elle ne tient qu’à un fil.\"\r\n\r\nJeune et talentueuse, Erine Peters se prépare à débuter sa deuxième année d\'internat en chirurgie. Mais un drame vient chambouler sa vie, la conduisant à quitter sa région pour le nouvel hôpital de Twin', '', 'Hugo Romans', '442', 'Bronze', 'Romance contemporaine', 'https://cdn.cultura.com/cdn-cgi/image/width=830/media/pim/TITELIVE/3_9782755678307_1_75.jpg', '', NULL, '2025-03-08', ''),
-(3, 'Acacia Black', 'Midnight Kiss', 'Non', 'Non', 'Non', '979-1-042-90092-2', 'Papier', 18.00, '2025-05-26', '2016-02-08', '0000-00-00', 'Non', 'Non', 'Une vidéo, un mensonge, une chance de tout sauver… mais à quel prix ?\r\n\r\nÀ Golden Hills University, où les relations entre athlètes sont strictement interdites, Nova et Cassius, basketteurs prometteurs que tout semble opposer, partagent un lien inattendu ', '', 'Hugo Romans', '689', 'Bronze', 'Campus Romance', 'https://static.fnac-static.com/multimedia/PE/Images/FR/NR/78/8f/1a/18517880/1540-1/tsp20250522080110/Midnight-Ki.jpg', 'Nova & Cassius', NULL, '2025-05-26', ''),
-(4, 'Adriana Dreux', 'Mysterious R', 'Non', 'Non', 'Non', '978-2-755-69193-1', 'Papier', 7.00, '2023-05-27', '2024-01-07', '2025-06-17', 'Non', 'Non', 'Angela en a marre. Les relations barbantes, elle en a fait le tour : elle veut un homme qui la fasse vibrer. Entre son goinfre de chat, sa meilleure amie un peu trop curieuse et son apollon de patron qui ne la regarde que pour critiquer son travail, elle ', '', 'Hugo Poche', '391', 'Bronze', 'Comédie romantique', 'https://cdn1.booknode.com/book_cover/4920/mysterious_r-4919900-264-432.webp', 'Angela & Andrea', NULL, '2023-05-27', ''),
-(5, 'AG Nevro', 'Not this time', 'Non', 'Non', 'Non', '978-2-380-15655-3', 'E-book', 7.00, '2023-06-23', '2025-02-02', '2025-06-17', 'Non', 'Non', 'De la haine à l\'amour, il n\'y a qu\'un pas\r\n\r\nAprès avoir sillonné les routes américaines, Ella et sa mère sont de retour à Ocean Bay, ville côtière de Californie qu’elles ont quittée un an plus tôt pour tenter d’oublier les problèmes auxquels toutes deux ', '', 'Nisha & Caetera', '528', 'Argent', 'Fantastic', 'https://cdn.cultura.com/cdn-cgi/image/width=450/media/pim/22_metadata-image-66441037.jpeg', '', NULL, '2023-06-23', ''),
-(6, 'Alex Aster', 'Lightlark T1', 'Non', 'Non', 'Non', '978-2-371-02370-3', 'Papier', NULL, '2023-04-01', '2015-06-16', '0000-00-00', '', '', '', '', 'Lumen', '600', 'Argent', 'Fantasy', NULL, '', NULL, '2023-04-01', ''),
-(9, 'Alexandra Ivy', 'Les Gardiens de l\'éternité T1', 'Non', 'Non', 'Non', '978-2-811-20512-6', 'Papier', 7.00, '2023-03-12', NULL, NULL, NULL, NULL, NULL, '', 'Editions Milady', '371', NULL, NULL, NULL, NULL, NULL, '2022-02-16', ''),
-(10, 'Alexiane De Lys', 'De sang, d\'écume et de glace T1', 'Non', 'Non', 'Non', '979-1-022-40577-5', 'Papier', 7.00, '2024-04-13', '2025-08-09', '2025-06-16', 'Non', 'Non', 'La perspective de passer ce qui pourrait être son dernier été loin de chez elle n\'enchante pas vraiment Perséphone. La jeune fille atteinte d\'une mystérieuse maladie qui l\'affaiblit de jour en jour se retrouve coincée dans le Finistère, chez une tante exc', '', 'Michel Lafon Poche', '624', 'Bronze', 'Romance', 'https://cdn1.booknode.com/book_cover/1483/full/de-sang-decume-et-de-glace-tome-1-metamorphose-1482868.jpg', '', NULL, '2024-04-13', ''),
-(11, 'Ali Hazelwood', 'Bride', 'Non', 'Non', 'Non', '978-2-811-22683-1', 'Hard back', 24.00, '2025-02-17', '0000-00-00', '0000-00-00', 'Non', 'Non', 'Misery Lark, la fille unique du conseiller vampyre le plus puissant du Sud-Ouest, est une paria... de nouveau. Les jours où elle vivait dans l\'anonymat parmi les humains sont désormais derrière elle : on a fait appel à elle pour renforcer une alliance his', '', 'Editions Milady', '442', '', '', 'https://cdn.cultura.com/cdn-cgi/image/width=830/media/pim/TITELIVE/30_9782811226831_1_75.jpg', '', NULL, '2025-02-17', ''),
-(12, 'Alice Oseman', 'Solitaire T1', 'Non', 'Non', 'Non', '978-2-095-02718-6', 'Hard back', 7.00, '2024-02-07', '2016-03-09', '2025-06-06', 'Oui', 'Non', 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has su', '', 'Nathan Romans', '395', 'Or', '', 'https://static.fnac-static.com/multimedia/PE/Images/FR/NR/0f/5a/00/16800271/1540-1/tsp20250412072704/SOLITAIRE.jpg', '', NULL, '2024-02-07', ''),
-(13, 'Alice Oseman', 'Heartstopper T1', 'Non', 'Non', 'Non', '978-2-017-10831-3', 'BD', 12.00, '2025-03-22', '2025-03-25', '2025-06-27', 'Non', 'Non', 'description heartstopperdescription heartstopperdescription heartstopperdescription heartstopper', '', 'Hachette Romans', '269', 'Argent', 'Romance contemporaine', 'https://img.chasse-aux-livres.fr/v7/_zmx1_/51OCz3XzlVL.jpg?w=230&h=250&func=fit&bg_opacity=0', 'Charle & Ben', NULL, '2025-03-22', ''),
-(15, 'A.G. Nevro', 'Not this time - Tome 1', 'Non', 'Non', 'Non', '9782380156553', 'E-book', 12.50, '2025-01-05', '2025-01-07', '2025-06-28', '', '', 'La série phénomè', '', 'Nisha et caetera', '327', 'Or', 'romance', 'https://cdn.cultura.com/cdn-cgi/image/width=830/media/pim/TITELIVE/40_9782380156546_1_75.jpg', '', NULL, '2025-01-05', ''),
-(22, 'Stephenie Meyer', 'The Chemist', 'Non', 'Non', 'Non', '9780751567663', 'Papier', 5.00, '2025-06-09', '2024-03-12', '2025-06-29', 'Non', 'Non', 'In this gripping page-turner, an ex-agent on the run from her former employers must take one more case to clear her name and save her life. The brand-new thriller from international number one bestseller Stephenie Meyer. She used to work for the U.S. gove', '', 'Hachette UK', '582', 'Argent', 'Fiction', 'http://books.google.com/books/content?id=DNmxDAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api', '', NULL, '2025-06-09', 'Bibliothèque'),
-(29, 'Rebecca Yarros', 'Onyx Storm', 'Non', 'Non', 'Non', '9782755673104', 'Hard back', 0.00, '2024-01-18', '2025-06-27', '2022-05-10', 'Oui', 'Non', 'AFFRONTER LES TÉNÈBRES La guerre prend un tournant massif mais le plus grand risque vient désormais de l\'intérieur. Plus amoureuse que jamais, Violet est bien décidée à affronter les ténèbres.', 'Chronique: AFFRONTER LES TÉNÈBRES La guerre prend un tournant massif mais le plus grand risque vient désormais de l\'intérieur. Plus amoureuse que jamais, Violet est bien décidée à affronter les ténèbres.', 'Hugo Roman', '766', 'Diamant', 'Fiction', 'http://books.google.com/books/content?id=-yU9EQAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api', 'Xaden & Violet', NULL, '2024-01-18', ''),
-(30, 'Rebecca Yarros', 'Onyx Storm', 'Non', 'Non', 'Non', '9789510514993', 'Hard back', 0.00, '2022-06-09', '2025-02-10', '2017-04-02', '', '', 'Brave the dark. Get ready to fly or die in the breathtaking follow-up to Fourth Wing and Iron Flame from the no. 1 Sunday Times and New York Times bestselling author Rebecca Yarros. Returning to the richly imagined world of Fourth Wing and Iron Flame, the', '', 'WSOY', '626', 'J\'ai lu aussi', 'Fiction', 'http://books.google.com/books/content?id=cYwdEQAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api', '', NULL, '2022-06-09', '');
+INSERT INTO `library` (`ID`, `Auteur`, `Titre`, `Dedicace`, `Marquepages`, `Goodies`, `ISBN`, `Format`, `Prix`, `Date_achat`, `Date_lecture`, `Relecture`, `Chronique_ecrite`, `Chronique_publiee`, `Details`, `Chronique`, `Maison_edition`, `Nombre_pages`, `Notation`, `Genre`, `Couverture`, `Couple`, `Themes`, `localisation`) VALUES
+(38, 'Eugénie Dielens', 'Off Limits', 'Non', 'Non', 'Non', '9782017246541', 'Poche', 6.50, '2025-06-27', '2025-06-30', '0000-00-00', 'Oui', 'Non', 'Lorsque Diana se retrouve placée en famille d\'accueil, elle débarque, dépitée, chez les Williams, de riches new-yorkais. Les parents font tout pour la mettre à l\'aise, mais Diana ne supporte pas leur fils, Corey, un des garçons les plus populaires du lycée. Surtout depuis une certaine soirée passée ensemble quelques temps auparavant... Leurs échanges ne sont désormais que moqueries et réparties cinglantes.\r\n\r\nAux yeux de Corey, Diana représente tout ce qu\'il déteste et désire à la fois. Il voit dans cette colocation forcée une opportunité pour enfin réussir à séduire la jolie blonde... si Diana ne le repoussait pas. Corey le sait : Diana est inaccessible, hors limite. Mais maintenant qu\'ils sont obligés et vivre sous le même toit, la tentation est plus forte que jamais...', 'Une romance toute douce, sans prise de tête.\r\nProximité forcée, seconde chance, vie lycéenne. De quoi faire une très bonne romance pour cet été.\r\n\r\nDiana est un personnage en apparence sure d\'elle, mais qui cache en réalité énormément d\'incertitudes. Elle se donne les moyens de réussir, même si pour cela elle doit se tenir éloignée des autres. Et dans un lycée de riches, venir d\'une famille sans beaucoup de moyens peut créer certains préjugés.\r\n\r\nCorey est un personnage à qui tout semble réussir. Ou au moins en apparence : capitaine de l\'équipe de Lacrosse, une famille qui a les moyens, des recruteurs pour l\'université. Mais la réalité est toute autre : personne ne le connait vraiment.\r\n\r\nQuand ces deux ados se retrouvent sous le même toit, après avoir failli passer à l\'acte, les choses se compliquent. \r\nVont-ils réussir à cohabiter les quelques mois les séparant de l\'université ?\r\n\r\nSi j\'ai une chose à reprocher à ce roman, c\'est le nombre considérable de coquilles de fautes d\'accord et de mots manquants qui m\'ont coupé dans ma lecture à de trop nombreuses reprises.', 'Hachette - Ito', '275', 'Or', 'Romance contemporaine', 'https://media.hachette.fr/fit-in/780x1280/imgArticle/HACHETTELAB/2023/9782017246541-001-X.jpeg?source=web', 'Diana Cooper & Corey Williams', 'Seconde chance,  Désintoxication, Proximité forcée, Addiction, Famille d\'accueil, Lycée, Avenir', 'Bibliothèque physique'),
+(39, 'Phoenix B Asher', 'Hotshot', 'Oui', 'Oui', 'Oui', '9782755679649', 'Grand Format', 17.50, '2025-04-12', '0000-00-00', '0000-00-00', '', '', 'Certains feux ne s\'éteignent jamais... ils dorment dans les cendres du passé, prêts à se raviver au moindre souffle.\r\n\r\nDepuis leur enfance, Salem, Boston et Jericho forment un trio inséparable, soudé par une amitié indéfectible.\r\n\r\nA mesure qu\'ils grandissent, tout se complique. Non seulement Boston et Jericho veulent devenir pompiers de l\'extrême, mais en plus les sentiments de Salem envers Jericho évoluent, mêlant l\'amitié à quelque chose de plus fort. Jericho, lui, n\'est pas prêt à franchir cette ligne. Quand la maladie emporte sa mère, il préfère fuir plutôt que d\'affronter ses émotions, et part s\'exiler en Irlande en laissant Salem derrière lui, le cœur brisé. \r\n\r\nCinq ans plus tard, à l\'occasion du mariage de Boston, Jericho revient. Salem devra alors affronter les blessures du passé et les sentiments qu\'elle croyait oubliés...', 'Certains feux ne s\'éteignent jamais... ils dorment dans les cendres du passé, prêts à se raviver au moindre souffle.\r\n\r\nDepuis leur enfance, Salem, Boston et Jericho forment un trio inséparable, soudé par une amitié indéfectible.\r\n\r\nA mesure qu\'ils grandissent, tout se complique. Non seulement Boston et Jericho veulent devenir pompiers de l\'extrême, mais en plus les sentiments de Salem envers Jericho évoluent, mêlant l\'amitié à quelque chose de plus fort. Jericho, lui, n\'est pas prêt à franchir cette ligne. Quand la maladie emporte sa mère, il préfère fuir plutôt que d\'affronter ses émotions, et part s\'exiler en Irlande en laissant Salem derrière lui, le cœur brisé. \r\n\r\nCinq ans plus tard, à l\'occasion du mariage de Boston, Jericho revient. Salem devra alors affronter les blessures du passé et les sentiments qu\'elle croyait oubliés...\r\n\r\nCertains feux ne s\'éteignent jamais... ils dorment dans les cendres du passé, prêts à se raviver au moindre souffle.\r\n\r\nDepuis leur enfance, Salem, Boston et Jericho forment un trio inséparable, soudé par une amitié indéfectible.\r\n\r\nA mesure qu\'ils grandissent, tout se complique. Non seulement Boston et Jericho veulent devenir pompiers de l\'extrême, mais en plus les sentiments de Salem envers Jericho évoluent, mêlant l\'amitié à quelque chose de plus fort. Jericho, lui, n\'est pas prêt à franchir cette ligne. Quand la maladie emporte sa mère, il préfère fuir plutôt que d\'affronter ses émotions, et part s\'exiler en Irlande en laissant Salem derrière lui, le cœur brisé. \r\n\r\nCinq ans plus tard, à l\'occasion du mariage de Boston, Jericho revient. Salem devra alors affronter les blessures du passé et les sentiments qu\'elle croyait oubliés...', 'Hugo Romans', '371', 'Bronze', 'Romance contemporaine', 'https://cdn1.booknode.com/book_cover/5604/hotshot-5604201-264-432.webp', 'Salem O\'Connell & Jericho McKenna', 'Romance', 'Bibliothèque physique');
 
 -- --------------------------------------------------------
 
@@ -103,18 +89,23 @@ CREATE TABLE `nb_page_lu` (
   `pages` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- --------------------------------------------------------
+
 --
--- Déchargement des données de la table `nb_page_lu`
+-- Structure de la table `settings`
 --
 
-INSERT INTO `nb_page_lu` (`id`, `date`, `pages`) VALUES
-(1, '2025-06-28', 185),
-(2, '2024-06-28', 135),
-(3, '2025-02-27', 250),
-(4, '2025-03-26', 150),
-(5, '2025-05-25', 145),
-(6, '2025-06-24', 160),
-(7, '2025-06-17', 50);
+CREATE TABLE `settings` (
+  `id` int(11) NOT NULL,
+  `admin_password` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `settings`
+--
+
+INSERT INTO `settings` (`id`, `admin_password`) VALUES
+(1, '$2y$10$kxZjtBDtMhAjYRu7VCpKPeXkOBTIM2w92AP1HudCU1gSjVP3RWqMa');
 
 --
 -- Index pour les tables déchargées
@@ -140,6 +131,12 @@ ALTER TABLE `nb_page_lu`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Index pour la table `settings`
+--
+ALTER TABLE `settings`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- AUTO_INCREMENT pour les tables déchargées
 --
 
@@ -153,13 +150,19 @@ ALTER TABLE `lecture`
 -- AUTO_INCREMENT pour la table `library`
 --
 ALTER TABLE `library`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT pour la table `nb_page_lu`
 --
 ALTER TABLE `nb_page_lu`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT pour la table `settings`
+--
+ALTER TABLE `settings`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Contraintes pour les tables déchargées

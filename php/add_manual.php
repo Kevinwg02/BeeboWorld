@@ -1,4 +1,10 @@
 <?php
+session_start();
+if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
+    header('Location: ../index.php');  // ← corrige bien le chemin
+    exit;
+}
+
 include 'connexion.php';
 
 $isbn = $_POST['isbn'] ?? '';
@@ -42,8 +48,8 @@ try {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $stmt = $pdo->prepare("INSERT INTO library 
-            (Auteur, Titre, Dedicace, Marquepages, Goodies, ISBN, Format, Prix, Date_achat, Date_lecture, Relecture, Chronique_ecrite, Chronique_publiee, Details, Maison_edition, Nombre_pages, Notation, Genre, Couverture, Couple, Chronique, localisation)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            (Auteur, Titre, Dedicace, Marquepages, Goodies, ISBN, Format, Prix, Date_achat, Date_lecture, Relecture, Chronique_ecrite, Chronique_publiee, Details, Themes, Maison_edition, Nombre_pages, Notation, Genre, Couverture, Couple, Chronique, localisation)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
         $stmt->execute([
             $_POST['auteur'] ?? '',
@@ -60,11 +66,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_POST['chronique_ecrite'] ?? '',
             $_POST['chronique_publiee'] ?? '',
             $_POST['details'] ?? '',
+            $_POST['Themes'] ?? '',
             $_POST['maison_edition'] ?? '',
             $_POST['nombre_pages'] ?? '',
             $_POST['notation'] ?? '',
             $_POST['genre'] ?? '',
-            $_POST['couverture'] ?? '',
+            !empty($_POST['couverture']) ? $_POST['couverture'] : '../assets/covers/TheAdventureOfBeebo.jpg',
             $_POST['couple'] ?? '',
             $_POST['chronique'] ?? '',
             $_POST['localisation'] ?? ''
@@ -94,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="container py-5">
         <h1 class="mb-4">✍️ Ajout manuel d’un livre</h1>
         <a href="stats.php" class="btn btn-primary mb-2">📊 Stats</a>
-        <a href="../index.php" class="btn btn-warning mb-2">📚 Library</a>
+        <a href="library.php" class="btn btn-warning mb-2">📚 Library</a>
 
 
 
@@ -145,9 +152,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </select>
             </div>
 
-          
 
-             <div class="col-md-3">
+
+            <div class="col-md-3">
                 <label>Format</label>
                 <input type="text" name="genre" class="form-control" list="format-list">
                 <datalist id="format-list">
@@ -206,7 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <?php endforeach; ?>
                 </datalist>
             </div>
-             <div class="col-md-3">
+            <div class="col-md-3">
                 <label>Localisation</label>
                 <input type="text" name="localisation" class="form-control" list="localisation-list">
                 <datalist id="localisation-list">
@@ -216,32 +223,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </datalist>
             </div>
 
-
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label>Notation</label>
-                <select name="notation" class="form-select">
-                    <option value=""> Choisir une notation </option>
+                <input type="text" name="notation" class="form-control" list="notation-list">
+                <datalist id="notation-list">
                     <?php foreach ($notations as $notation): ?>
-                        <option value="<?= htmlspecialchars($notation) ?>" <?= isset($livre['notation']) && $livre['notation'] === $notation ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($notation) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
+                        <option value="<?= htmlspecialchars($notation) ?>">
+                        <?php endforeach; ?>
+                </datalist>
             </div>
 
-            <div class="col-md-4">
+
+            <div class="col-md-3">
                 <label>Couple</label>
                 <input type="text" name="couple" class="form-control">
             </div>
-            <div class="col-md-4">
+            <div class="col-3">
+                <label>Themes</label>
+                <input type="text" name="Themes" class="form-control">
+            </div>
+            <div class="col-md-12">
                 <label>Image (URL de couverture)</label>
-                <input type="text" name="couverture" class="form-control">
+                <input type="text" name="couverture" class="form-control" value="../assets/covers/TheAdventureOfBeebo.jpg">
             </div>
             <div class="col-12">
-                <label>Description</label>
+                <label>Résumé</label>
                 <textarea name="details" class="form-control" rows="4"></textarea>
             </div>
-               <div class="col-12">
+            <div class="col-12">
                 <label>Chronique</label>
                 <textarea name="chronique" class="form-control" rows="4"></textarea>
             </div>
