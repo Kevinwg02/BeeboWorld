@@ -8,7 +8,12 @@ if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
 include 'connexion.php';
 
 // Statistiques globales avec filtre "bibliotheque"
+setlocale(LC_TIME, 'fr_FR.UTF-8', 'fra', 'fr_FR', 'fr', 'French_France.1252');
 $annee_actuelle = date('Y');
+$mois_actuel = date('m');
+$stmt = $pdo->prepare("SELECT SUM(pages) FROM nb_page_lu WHERE YEAR(date) = ? AND MONTH(date) = ?");
+$stmt->execute([$annee_actuelle, $mois_actuel]);
+$pages_mois_actuel = $stmt->fetchColumn() ?? 0;
 
 // Livres lus cette année
 $stmt = $pdo->prepare("SELECT COUNT(*) FROM library WHERE YEAR(Date_lecture) = ? AND localisation = 'Bibliothèque physique'");
@@ -105,6 +110,7 @@ foreach ($all_months as $m) {
     <meta charset="UTF-8">
     <title>Statistiques bibliothèque</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="shortcut icon" href="../assets/favicon.ico" type="image/x-icon">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
@@ -114,32 +120,42 @@ foreach ($all_months as $m) {
             <a href="add_manual.php" class="btn btn-primary mb-2">➕ Ajout manuel</a>
             <a href="library.php" class="btn btn-warning mb-2">📚 Library</a>
             <a href="admin_book.php" class="btn btn-success mb-2">📚 Admin</a>
+            <button type="button" class="btn btn-info mb-2" data-bs-toggle="modal" data-bs-target="#pagesModal">
+                📖 Pages lues
+            </button>
         </div>
 
         <h1>Statistiques de la bibliothèque</h1>
-        <div class="row text-center mb-4">
-            <div class="col-md-3">
+        <div class="row row-cols-1 row-cols-md-5 g-3 text-center mb-4">
+            <div class="col">
                 <div class="bg-white rounded shadow-sm p-3">
                     <h5 class="text-muted">Livres lus en <?= $annee_actuelle ?></h5>
                     <h3 class="text-primary"><?= $nb_lus_annee ?></h3>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col">
                 <div class="bg-white rounded shadow-sm p-3">
                     <h5 class="text-muted">Livres achetés en <?= $annee_actuelle ?></h5>
                     <h3 class="text-success"><?= $nb_achetes_annee ?></h3>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col">
                 <div class="bg-white rounded shadow-sm p-3">
-                    <h5 class="text-muted">Livres dans la bibliothèque</h5>
+                    <h5 class="text-muted">Bibliothèque</h5>
                     <h3 class="text-dark"><?= $nb_total_biblio ?></h3>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col">
                 <div class="bg-white rounded shadow-sm p-3">
                     <h5 class="text-muted">Total dépenses</h5>
                     <h3 class="text-danger"><?= number_format($prix_total, 2, ',', ' ') ?> €</h3>
+                </div>
+            </div>
+            <div class="col">
+                <div class="bg-white rounded shadow-sm p-3">
+                    <h5 class="text-muted">Pages lues en <?= strftime('%B') ?></h5>
+
+                    <h3 class="text-purple"><?= number_format($pages_mois_actuel, 0, ',', ' ') ?> pages</h3>
                 </div>
             </div>
         </div>
@@ -205,7 +221,30 @@ foreach ($all_months as $m) {
 
         <a href="library.php" class="btn btn-primary mt-3">⬅ Retour à la bibliothèque</a>
     </div>
-
+    <!-- Modal Ajout Pages Lues -->
+    <div class="modal fade" id="pagesModal" tabindex="-1" aria-labelledby="pagesModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="pages_lu.php" class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="pagesModalLabel">Ajouter des pages lues</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="date" class="form-label">Date</label>
+                        <input type="date" class="form-control" name="date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="pages" class="form-label">Nombre de pages lues</label>
+                        <input type="number" class="form-control" name="pages" min="1" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
     <script>
         const ctx = document.getElementById('chartStats').getContext('2d');
 
@@ -300,7 +339,7 @@ foreach ($all_months as $m) {
         console.log('Max livres lus:', Math.max(...dataLectures));
         console.log('Nb pages lus:', Math.max(...dataPages));
     </script>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

@@ -1,8 +1,8 @@
 <?php
 session_start();
 if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
-    header('Location: ../index.php');
-    exit;
+  header('Location: ../index.php');
+  exit;
 }
 
 include 'connexion.php';
@@ -17,10 +17,10 @@ if (isset($_GET['delete'])) {
 
 // Suppression pages lues
 if (isset($_GET['delete_page'])) {
-    $deletePageId = (int) $_GET['delete_page'];
-    $pdo->prepare("DELETE FROM nb_page_lu WHERE id = ?")->execute([$deletePageId]);
-    header("Location: admin_book.php?success_page_delete=1");
-    exit;
+  $deletePageId = (int) $_GET['delete_page'];
+  $pdo->prepare("DELETE FROM nb_page_lu WHERE id = ?")->execute([$deletePageId]);
+  header("Location: admin_book.php?success_page_delete=1");
+  exit;
 }
 
 // Filtres livres
@@ -78,6 +78,7 @@ $pages_lues = $stmt_pages->fetchAll(PDO::FETCH_ASSOC);
   <title>Admin - Gestion complète de la bibliothèque</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="../css/themes.css" />
+  <link rel="shortcut icon" href="../assets/favicon.ico" type="image/x-icon">
 </head>
 
 <body class="bg-light">
@@ -156,12 +157,12 @@ $pages_lues = $stmt_pages->fetchAll(PDO::FETCH_ASSOC);
               <?php foreach ($book as $key => $value): ?>
                 <td>
                   <?php
-                    if ($key === 'Details') {
-                      $text = strip_tags($value ?? '');
-                      echo htmlspecialchars(mb_strimwidth($text, 0, 100, '...'));
-                    } else {
-                      echo htmlspecialchars($value ?? '');
-                    }
+                  if ($key === 'Details') {
+                    $text = strip_tags($value ?? '');
+                    echo htmlspecialchars(mb_strimwidth($text, 0, 100, '...'));
+                  } else {
+                    echo htmlspecialchars($value ?? '');
+                  }
                   ?>
                 </td>
               <?php endforeach; ?>

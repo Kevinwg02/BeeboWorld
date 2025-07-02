@@ -34,6 +34,7 @@ if (!$book) {
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($book['Titre']) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="shortcut icon" href="../assets/favicon.ico" type="image/x-icon">
     <style>
         img {
             width: 70%;
@@ -180,34 +181,34 @@ if (!$book) {
                                     !empty($book['Chronique']) &&
                                     strtolower($book['Chronique_ecrite']) === 'oui' &&
                                     strtolower($book['Chronique_publiee']) !== 'non'
-                                ) 
+                                )
                                 ?>
                             </div>
-                            </div>
-                        <?php endif; ?>
-
-
-
                         </div>
+                    <?php endif; ?>
 
-                        <!-- Actions -->
-                        <div class="mt-3">
-                            <a href="library.php" class="btn btn-primary me-2">⬅ Retour</a>
-                            <a href="update.php?id=<?= $book['ID'] ?>" class="btn btn-warning me-2">✏️ Modifier</a>
-                            <a href="?delete=<?= $book['ID'] ?>" class="btn btn-danger" onclick="return confirm('Supprimer ce livre ?')">🗑️ Supprimer</a>
-                        </div>
+
+
+                </div>
+
+                <!-- Actions -->
+                <div class="mt-3">
+                    <a href="library.php" class="btn btn-primary me-2">⬅ Retour</a>
+                    <a href="update.php?id=<?= $book['ID'] ?>" class="btn btn-warning me-2">✏️ Modifier</a>
+                    <a href="?delete=<?= $book['ID'] ?>" class="btn btn-danger" onclick="return confirm('Supprimer ce livre ?')">🗑️ Supprimer</a>
                 </div>
             </div>
-
-            <!-- Détails & Chronique -->
-            <div class="mt-5">
-                <div class="section-title">📝 Résumé</div>
-                <p><?= nl2br(htmlspecialchars($book['Details'])) ?></p>
-
-                <div class="section-title">📖 Chronique</div>
-                <p><?= nl2br(htmlspecialchars($book['Chronique'])) ?></p>
-            </div>
         </div>
+
+        <!-- Détails & Chronique -->
+        <div class="mt-5">
+            <div class="section-title">📝 Résumé</div>
+            <p><?= nl2br(htmlspecialchars($book['Details'])) ?></p>
+
+            <div class="section-title">📖 Chronique</div>
+            <p><?= nl2br(htmlspecialchars($book['Chronique'])) ?></p>
+        </div>
+    </div>
 </body>
 
 </html>
