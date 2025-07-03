@@ -5,7 +5,7 @@ if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
     exit;
 }
 
-include '../php/connexion.php';
+include 'connexion.php';
 
 $id = $_GET['id'] ?? null;
 $message = '';
@@ -43,7 +43,7 @@ if (!$book) {
 $fields = [
     'Auteur', 'Titre', 'Dedicace', 'Marquepages', 'Goodies', 'ISBN', 'Format', 'Prix',
     'Date_achat', 'Date_lecture', 'Relecture', 'Chronique_ecrite', 'Chronique_publiee',
-    'Details', 'Citation' ,'Chronique', 'Maison_edition', 'Nombre_pages', 'Notation', 'Genre',
+    'Details', 'Chronique', 'Maison_edition', 'Nombre_pages', 'Notation', 'Genre',
     'Themes', 'Couple', 'Couverture', 'localisation'
 ];
 
@@ -167,7 +167,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             input("Image (URL de couverture)", 'Couverture', 'text', 6);
             textarea("Résumé", 'Details');
             textarea("Chronique", 'Chronique');
-            textarea("Citation", 'Citation');
             ?>
             <div class="col-12 text-end mt-4">
                 <button type="submit" class="btn btn-success mb-3">💾 Enregistrer</button>

@@ -5,7 +5,7 @@ if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
     exit;
 }
 
-include '../php/connexion.php';
+include 'connexion.php';
 
 $isbn = $_POST['isbn'] ?? '';
 $book = null;
@@ -48,8 +48,8 @@ try {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $stmt = $pdo->prepare("INSERT INTO library 
-            (Auteur, Titre, Dedicace, Marquepages, Goodies, ISBN, Format, Prix, Date_achat, Date_lecture, Relecture, Chronique_ecrite, Chronique_publiee, Details, Themes, Maison_edition, Nombre_pages, Notation, Genre, Couverture, Couple, Chronique, Citation, localisation)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            (Auteur, Titre, Dedicace, Marquepages, Goodies, ISBN, Format, Prix, Date_achat, Date_lecture, Relecture, Chronique_ecrite, Chronique_publiee, Details, Themes, Maison_edition, Nombre_pages, Notation, Genre, Couverture, Couple, Chronique, localisation)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
         $stmt->execute([
             $_POST['auteur'] ?? '',
@@ -65,7 +65,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_POST['relecture'] ?? '',
             $_POST['chronique_ecrite'] ?? '',
             $_POST['chronique_publiee'] ?? '',
-            $_POST['citation'] ?? '',
             $_POST['details'] ?? '',
             $_POST['Themes'] ?? '',
             $_POST['maison_edition'] ?? '',
@@ -98,40 +97,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 
 <body class="bg-light">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="../index.php">📚 Beeboworld</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <!-- Left-aligned nav items (if needed in future) -->
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="admin_book.php">🛠️ Admin</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="stats.php">📊 Stats</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="library.php">📚 Library</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="add_manual.php">➕ Ajout manuel</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link btn" data-bs-toggle="modal" data-bs-target="#pagesModal" href="#">📖 Pages lues</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-</body>
 
-<body class="bg-light">
-    <div class="container py-4">
+    <div class="container py-5">
         <h1 class="mb-4">✍️ Ajout manuel d’un livre</h1>
         <a href="stats.php" class="btn btn-primary mb-2">📊 Stats</a>
         <a href="library.php" class="btn btn-warning mb-2">📚 Library</a>
@@ -287,10 +254,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label>Chronique</label>
                 <textarea name="chronique" class="form-control" rows="4"></textarea>
             </div>
-            <div class="col-12">
-                <label>Citation</label>
-                <textarea name="chronique" class="form-control" rows="4"></textarea>
-            </div>
 
             <div class="col-12 text-end">
                 <button type="submit" class="btn btn-success">➕ Ajouter le livre</button>
@@ -298,32 +261,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         </form>
     </div>
-    <!-- Modal Ajout Pages Lues -->
-    <div class="modal fade" id="pagesModal" tabindex="-1" aria-labelledby="pagesModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <form method="POST" action="pages_lu.php" class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="pagesModalLabel">Ajouter des pages lues</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="date" class="form-label">Date</label>
-                        <input type="date" class="form-control" name="date" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="pages" class="form-label">Nombre de pages lues</label>
-                        <input type="number" class="form-control" name="pages" min="1" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 

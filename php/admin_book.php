@@ -5,7 +5,7 @@ if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
   exit;
 }
 
-include '../php/connexion.php';
+include 'connexion.php';
 
 // Suppression livre
 if (isset($_GET['delete'])) {
@@ -53,30 +53,11 @@ if ($formatFilter) {
 
 $whereSQL = $whereClauses ? ('WHERE ' . implode(' AND ', $whereClauses)) : '';
 
-// Pagination setup
-$limit = 10;
-$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
-$offset = ($page - 1) * $limit;
-
-// Total count (for pagination)
-$countSql = "SELECT COUNT(*) FROM library $whereSQL";
-$countStmt = $pdo->prepare($countSql);
-$countStmt->execute($params);
-$totalBooks = $countStmt->fetchColumn();
-$totalPages = ceil($totalBooks / $limit);
-
-// Book query with LIMIT
-$sql = "SELECT * FROM library $whereSQL ORDER BY ID DESC LIMIT :limit OFFSET :offset";
+$sql = "SELECT * FROM library $whereSQL ORDER BY ID DESC";
 $stmt = $pdo->prepare($sql);
-foreach ($params as $i => $param) {
-  $stmt->bindValue($i + 1, $param);
-}
-$stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-$stmt->execute();
+$stmt->execute($params);
 $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Filters data
 $genres = $pdo->query("SELECT DISTINCT Genre FROM library WHERE Genre IS NOT NULL AND Genre != '' ORDER BY Genre")->fetchAll(PDO::FETCH_COLUMN);
 $notations = $pdo->query("SELECT DISTINCT notation FROM library WHERE notation IS NOT NULL AND notation != '' ORDER BY notation")->fetchAll(PDO::FETCH_COLUMN);
 $formats = $pdo->query("SELECT DISTINCT Format FROM library WHERE Format IS NOT NULL AND Format != '' ORDER BY Format")->fetchAll(PDO::FETCH_COLUMN);
@@ -88,8 +69,6 @@ $stmt_pages->execute();
 $pages_lues = $stmt_pages->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-
-
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -100,48 +79,18 @@ $pages_lues = $stmt_pages->fetchAll(PDO::FETCH_ASSOC);
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="../css/themes.css" />
   <link rel="shortcut icon" href="../assets/favicon.ico" type="image/x-icon">
-
 </head>
-
-<body class="bg-light">
-  <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="../index.php">📚 Beeboworld</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <!-- Left-aligned nav items (if needed in future) -->
-        </ul>
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <a class="nav-link" href="admin_book.php">🛠️ Admin</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="stats.php">📊 Stats</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="library.php">📚 Library</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="add_manual.php">➕ Ajout manuel</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link btn" data-bs-toggle="modal" data-bs-target="#pagesModal" href="#">📖 Pages lues</a>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-</body>
 
 <body class="bg-light">
   <div class="container-fluid py-4">
     <h1 class="mb-4">📚 Administration complète des livres</h1>
-    <!-- <a href="library.php" class="btn btn-warning mb-3">📚 Library</a>
+    <a href="library.php" class="btn btn-warning mb-3">📚 Library</a>
     <a href="stats.php" class="btn btn-primary mb-3">📊 Stats</a>
-    <a href="add_manual.php" class="btn btn-success mb-3">➕ Ajout manuel</a> -->
+    <a href="add_manual.php" class="btn btn-success mb-3">➕ Ajout manuel</a>
+
+    <button type="button" class="btn btn-info mb-3" data-bs-toggle="modal" data-bs-target="#pagesLuesModal">
+      📖 Pages lues
+    </button>
 
     <form method="GET" class="row g-3 mb-4">
       <div class="col-md-3">
@@ -179,11 +128,7 @@ $pages_lues = $stmt_pages->fetchAll(PDO::FETCH_ASSOC);
       </div>
       <div class="col-md-3">
         <button class="btn btn-primary" type="submit">Filtrer</button>
-        <button type="button" class="btn btn-info md-3" data-bs-toggle="modal" data-bs-target="#pagesLuesModal">
-          📖 Pages lues
-        </button>
       </div>
-
     </form>
 
     <?php if (isset($_GET['success'])): ?>
@@ -286,33 +231,7 @@ $pages_lues = $stmt_pages->fetchAll(PDO::FETCH_ASSOC);
     </div>
   </div>
 
-<!-- Modal Ajout Pages Lues -->
-<div class="modal fade" id="pagesModal" tabindex="-1" aria-labelledby="pagesModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <form method="POST" action="pages_lu.php" class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="pagesModalLabel">Ajouter des pages lues</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label for="date" class="form-label">Date</label>
-                    <input type="date" class="form-control" name="date" required>
-                </div>
-                <div class="mb-3">
-                    <label for="pages" class="form-label">Nombre de pages lues</label>
-                    <input type="number" class="form-control" name="pages" min="1" required>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-primary">Enregistrer</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

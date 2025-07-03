@@ -66,7 +66,7 @@ function regrouperParAnnee($data) {
         $result[$annee][$moisNum] = $count;
     }
     krsort($result);
-    foreach ($result as &$moisArray) ksort($moisArray);
+    foreach ($result as &$moisArray) krsort($moisArray);
     return $result;
 }
 
@@ -99,6 +99,7 @@ foreach ($all_months as $m) {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-light">
+    
     <div class="container py-4">
         <div class="mb-3">
             <a href="../index.php" class="btn btn-warning mb-2">📚 Library</a>
@@ -184,19 +185,17 @@ foreach ($all_months as $m) {
             </div>
 
             <div class="col-md-12">
-                <h2>Pages lues par année et mois</h2>
+            <h2>Pages lues par année</h2>
+            <ul class="list-group mb-3">
                 <?php foreach ($pages_par_annee as $annee => $moisArray): ?>
-                    <h3><?= htmlspecialchars($annee) ?></h3>
-                    <ul class="list-group mb-3">
-                        <?php foreach ($moisArray as $moisNum => $total): ?>
-                            <li class="list-group-item d-flex justify-content-between">
-                                <span class="flex-grow-1"><?= formatMois($annee, $moisNum) ?></span>
-                                <span><?= number_format($total, 0, ',', ' ') ?> pages</span>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
+                    <li class="list-group-item">
+                        <a href="public_pages_lues_mois.php?annee=<?= urlencode($annee) ?>">
+                            <?= htmlspecialchars($annee) ?>
+                        </a>
+                    </li>
                 <?php endforeach; ?>
-            </div>
+            </ul>
+        </div>
         </div>
 
         <a href="../index.php" class="btn btn-primary mt-3">⬅ Retour à la bibliothèque</a>

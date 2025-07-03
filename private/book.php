@@ -73,9 +73,16 @@ if (!$book) {
             <!-- Couverture -->
             <div class="col-md-4">
                 <?php
-                $cover = $book['Couverture'] ?: "https://covers.openlibrary.org/b/isbn/" . preg_replace('/[^0-9Xx]/', '', $book['ISBN']) . "-L.jpg";
+                   $cover = trim($book['Couverture']);
+                    $coverUrl = (!empty($cover))
+                        ? htmlspecialchars($cover)  // Ne pas vérifier file_exists ici car c'est un chemin web
+                        : (!empty($book['ISBN'])
+                            ? "https://covers.openlibrary.org/b/isbn/" . preg_replace('/[^0-9Xx]/', '', $book['ISBN']) . "-L.jpg"
+                            : "../assets/covers/TheAdventureOfBeebo.jpg");
+
                 ?>
-                <img src="<?= htmlspecialchars($cover) ?>" alt="Couverture" class="img-fluid shadow-sm rounded">
+                <img src="<?= $coverUrl ?>" alt="Couverture" class="img-fluid shadow-sm rounded">
+
             </div>
 
             <!-- Infos -->
@@ -207,6 +214,9 @@ if (!$book) {
 
             <div class="section-title">📖 Chronique</div>
             <p><?= nl2br(htmlspecialchars($book['Chronique'])) ?></p>
+
+            <div class="section-title">📖 Citation</div>
+            <p><?= nl2br(htmlspecialchars($book['Citation'])) ?></p>
         </div>
     </div>
 </body>

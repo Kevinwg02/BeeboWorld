@@ -1,12 +1,19 @@
 <?php
-// session_start();
-// if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
-//     header('Location: ../index.php');  // ← corrige bien le chemin
-//     exit;
-// }
+session_start();
+if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
+    header('Location: ../index.php');  // ← corrige bien le chemin
+    exit;
+}
 
-include '../php/connexion.php';
+include 'connexion.php';
 
+// Suppression
+if (isset($_GET['delete'])) {
+    $deleteId = (int) $_GET['delete'];
+    $pdo->prepare("DELETE FROM library WHERE ID = ?")->execute([$deleteId]);
+    header("Location: library.php?deleted=1");
+    exit;
+}
 
 $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $stmt = $pdo->prepare("SELECT * FROM library WHERE ID = ?");
@@ -59,7 +66,8 @@ if (!$book) {
 
 <body class="bg-light">
     <div class="container py-4">
-        <a href="../index.php" class="btn btn-warning mb-3">📚 Library</a>
+        <a href="library.php" class="btn btn-warning mb-3">📚 Library</a>
+        <a href="add_manual.php" class="btn btn-primary mb-3">➕ Ajout manuel</a>
         <h1 class="mb-4"><?= htmlspecialchars($book['Titre']) ?></h1>
         <div class="row">
             <!-- Couverture -->
@@ -182,6 +190,13 @@ if (!$book) {
 
 
                 </div>
+
+                <!-- Actions -->
+                <div class="mt-3">
+                    <a href="library.php" class="btn btn-primary me-2">⬅ Retour</a>
+                    <a href="update.php?id=<?= $book['ID'] ?>" class="btn btn-warning me-2">✏️ Modifier</a>
+                    <a href="?delete=<?= $book['ID'] ?>" class="btn btn-danger" onclick="return confirm('Supprimer ce livre ?')">🗑️ Supprimer</a>
+                </div>
             </div>
         </div>
 
@@ -192,9 +207,6 @@ if (!$book) {
 
             <div class="section-title">📖 Chronique</div>
             <p><?= nl2br(htmlspecialchars($book['Chronique'])) ?></p>
-
-            <div class="section-title">📖 Citation</div>
-            <p><?= nl2br(htmlspecialchars($book['Citation'])) ?></p>
         </div>
     </div>
 </body>
