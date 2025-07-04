@@ -267,7 +267,7 @@ $localisations = $pdo->query("SELECT DISTINCT localisation FROM library WHERE lo
     <!-- Modal Ajout Pages Lues -->
     <div class="modal fade" id="pagesModal" tabindex="-1" aria-labelledby="pagesModalLabel" aria-hidden="true">
         <div class="modal-dialog">
-            <form method="POST" action="pages_lu.php" class="modal-content">
+            <form method="POST" action="library.php" class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="pagesModalLabel">Ajouter des pages lues</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>

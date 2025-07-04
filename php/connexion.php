@@ -2,7 +2,7 @@
 $host = 'localhost';
 $dbname = 'DbBeeboWorld';
 $username = 'root';
-$password = 'MSrpelAUyk2tg3oQ';
+$password = '';
 
 $dsn = "mysql:host=$host;dbname=$dbname;charset=utf8mb4";
 

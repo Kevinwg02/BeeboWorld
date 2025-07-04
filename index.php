@@ -85,6 +85,7 @@ $localisations = $pdo->query("SELECT DISTINCT localisation FROM library WHERE lo
 
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <title>Ma Bibliothèque Public</title>
@@ -95,6 +96,7 @@ $localisations = $pdo->query("SELECT DISTINCT localisation FROM library WHERE lo
             height: 20em;
             object-fit: cover;
         }
+
         .card-title {
             font-size: 0.8rem;
             white-space: nowrap;
@@ -106,101 +108,105 @@ $localisations = $pdo->query("SELECT DISTINCT localisation FROM library WHERE lo
 </head>
 
 <body class="bg-light">
-<div class="container py-4">
-    <h1 class="mb-4">  <a href="php/login.php" class="text-decoration-none text-dark">📚</a> Ma Bibliothèque</h1>
+    <div class="container py-4">
+        <h1 class="mb-4"> <a href="php/login.php" class="text-decoration-none text-dark">📚</a> Ma Bibliothèque</h1>
 
-    <form method="GET" class="d-flex flex-wrap gap-2 align-items-center mb-4">
-        <input type="text" name="search" class="form-control" placeholder="Titre ou auteur..." value="<?= htmlspecialchars($search) ?>" style="min-width: 200px;">
+        <form method="GET" class="d-flex flex-wrap gap-2 align-items-center mb-4">
+            <input type="text" name="search" class="form-control" placeholder="Titre ou auteur..." value="<?= htmlspecialchars($search) ?>" style="min-width: 200px;">
 
-        <select name="genre" class="form-select" style="width: 250px;">
-            <option value="">Tous les genres</option>
-            <?php foreach ($genres as $genre): ?>
-                <option value="<?= htmlspecialchars($genre) ?>" <?= $genreFilter === $genre ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($genre) ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
+            <select name="genre" class="form-select" style="width: 250px;">
+                <option value="">Tous les genres</option>
+                <?php foreach ($genres as $genre): ?>
+                    <option value="<?= htmlspecialchars($genre) ?>" <?= $genreFilter === $genre ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($genre) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
 
-        <select name="notation" class="form-select" style="width: 250px;">
-            <option value="">Toutes les médailles</option>
-            <?php foreach ($notations as $notation): ?>
-                <option value="<?= htmlspecialchars($notation) ?>" <?= $notationFilter === $notation ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($notation) ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
+            <select name="notation" class="form-select" style="width: 250px;">
+                <option value="">Toutes les médailles</option>
+                <?php foreach ($notations as $notation): ?>
+                    <option value="<?= htmlspecialchars($notation) ?>" <?= $notationFilter === $notation ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($notation) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
 
-        <select name="localisation" class="form-select" style="width: 250px;">
-            <option value="">Localisation des livres</option>
-            <?php foreach ($localisations as $loc): ?>
-                <option value="<?= htmlspecialchars($loc) ?>" <?= $localisationFilter === $loc ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($loc) ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
+            <select name="localisation" class="form-select" style="width: 250px;">
+                <option value="">Localisation des livres</option>
+                <?php foreach ($localisations as $loc): ?>
+                    <option value="<?= htmlspecialchars($loc) ?>" <?= $localisationFilter === $loc ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($loc) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
 
-        <select name="format" class="form-select" style="width: 250px;">
-            <option value="">Tous les formats</option>
-            <?php foreach ($formats as $format): ?>
-                <option value="<?= htmlspecialchars($format) ?>" <?= $formatFilter === $format ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($format) ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
+            <select name="format" class="form-select" style="width: 250px;">
+                <option value="">Tous les formats</option>
+                <?php foreach ($formats as $format): ?>
+                    <option value="<?= htmlspecialchars($format) ?>" <?= $formatFilter === $format ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($format) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
 
-        <select name="etat_lu" class="form-select" style="width: 250px;">
-            <option value="">Lu ou non</option>
-            <option value="oui" <?= $etatLuFilter === 'oui' ? 'selected' : '' ?>>Oui</option>
-            <option value="non" <?= $etatLuFilter === 'non' ? 'selected' : '' ?>>Non</option>
-        </select>
+            <select name="etat_lu" class="form-select" style="width: 250px;">
+                <option value="">Lu ou non</option>
+                <option value="oui" <?= $etatLuFilter === 'oui' ? 'selected' : '' ?>>Oui</option>
+                <option value="non" <?= $etatLuFilter === 'non' ? 'selected' : '' ?>>Non</option>
+            </select>
 
-        <button type="submit" class="btn btn-primary">Filtrer</button>
-        <a href="<?= strtok($_SERVER["REQUEST_URI"], '?') ?>" class="btn btn-outline-secondary">Réinitialiser</a>
-    </form>
+            <button type="submit" class="btn btn-primary">Filtrer</button>
+            <a href="<?= strtok($_SERVER["REQUEST_URI"], '?') ?>" class="btn btn-outline-secondary">Réinitialiser</a>
+        </form>
 
-    <div class="mb-3">
-        <a href="public/public_stats.php" class="btn btn-warning mb-2">📊 Stats</a>
-    </div>
+        <div class="mb-3">
+            <a href="public/public_stats.php" class="btn btn-warning mb-2">📊 Stats</a>
+        </div>
 
-    <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
-        <?php if ($books): ?>
-            <?php foreach ($books as $book): ?>
-                <?php
-                $coverUrl = !empty($book['Couverture']) ? htmlspecialchars($book['Couverture']) :
-                    (!empty($book['ISBN']) ? "https://covers.openlibrary.org/b/isbn/" . preg_replace('/[^0-9Xx]/', '', $book['ISBN']) . "-L.jpg" :
-                    "https://greenhousescribes.com/wp-content/uploads/2020/10/book-cover-generic.jpg");
-                ?>
-                <div class="col">
-                    <div class="card h-100 shadow-sm">
-                        <a href="public/public_book.php?id=<?= $book['ID'] ?>">
-                            <img src="<?= $coverUrl ?>" class="card-img-top" alt="Couverture de <?= htmlspecialchars($book['Titre']) ?>">
-                        </a>
-                        <div class="card-body p-2 d-flex align-items-center justify-content-center">
-                            <h5 class="card-title" title="<?= htmlspecialchars($book['Titre']) ?>"><?= htmlspecialchars($book['Titre']) ?></h5>
+        <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
+            <?php if ($books): ?>
+                <?php foreach ($books as $book): ?>
+                    <?php
+                    $cover = trim($book['Couverture']);
+                    $coverUrl = (!empty($cover))
+                        ? htmlspecialchars($cover)  // Ne pas vérifier file_exists ici car c'est un chemin web
+                        : (!empty($book['ISBN'])
+                            ? "https://covers.openlibrary.org/b/isbn/" . preg_replace('/[^0-9Xx]/', '', $book['ISBN']) . "-L.jpg"
+                            : "../assets/covers/TheAdventureOfBeebo.jpg");
+                    ?>
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            <a href="public/public_book.php?id=<?= $book['ID'] ?>">
+                                <img src="<?= $coverUrl ?>" class="card-img-top" alt="Couverture de <?= htmlspecialchars($book['Titre']) ?>">
+                            </a>
+                            <div class="card-body p-2 d-flex align-items-center justify-content-center">
+                                <h5 class="card-title" title="<?= htmlspecialchars($book['Titre']) ?>"><?= htmlspecialchars($book['Titre']) ?></h5>
+                            </div>
                         </div>
                     </div>
-                </div>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <p class="text-center text-muted">Aucun livre trouvé.</p>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p class="text-center text-muted">Aucun livre trouvé.</p>
+            <?php endif; ?>
+        </div>
+
+        <?php if ($totalPages > 1): ?>
+            <nav class="mt-4 d-flex justify-content-center">
+                <ul class="pagination">
+                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                        <li class="page-item <?= $i == $pageActuelle ? 'active' : '' ?>">
+                            <a class="page-link" href="?<?= http_build_query(array_merge($_GET, ['page' => $i])) ?>">
+                                <?= $i ?>
+                            </a>
+                        </li>
+                    <?php endfor; ?>
+                </ul>
+            </nav>
         <?php endif; ?>
     </div>
 
-    <?php if ($totalPages > 1): ?>
-        <nav class="mt-4 d-flex justify-content-center">
-            <ul class="pagination">
-                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                    <li class="page-item <?= $i == $pageActuelle ? 'active' : '' ?>">
-                        <a class="page-link" href="?<?= http_build_query(array_merge($_GET, ['page' => $i])) ?>">
-                            <?= $i ?>
-                        </a>
-                    </li>
-                <?php endfor; ?>
-            </ul>
-        </nav>
-    <?php endif; ?>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

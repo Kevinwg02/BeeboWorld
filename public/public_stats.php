@@ -127,7 +127,7 @@ foreach ($all_months as $m) {
             </div>
             <div class="col">
                 <div class="bg-white rounded shadow-sm p-3">
-                    <h5 class="text-muted">Total dépenses</h5>
+                    <h5 class="text-muted">Valeur de la bibliothèque</h5>
                     <h3 class="text-danger"><?= number_format($prix_total, 2, ',', ' ') ?> €</h3>
                 </div>
             </div>
