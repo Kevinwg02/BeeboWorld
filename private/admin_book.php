@@ -121,6 +121,10 @@ $pages_lues = $stmt_pages->fetchAll(PDO::FETCH_ASSOC);
                     <li class="nav-item">
                         <a class="nav-link" href="/nano/nanostats.php">📊 Nano Stats</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/nano/adminnano.php">🛠️ Admin Nano</a>
+                    </li>
+                    
                 </ul>
                 <ul class="navbar-nav">
                     <!-- Section Admin -->

@@ -144,6 +144,9 @@ $localisations = $pdo->query("SELECT DISTINCT localisation FROM library WHERE lo
                     <li class="nav-item">
                         <a class="nav-link" href="/nano/nanostats.php">📊 Nano Stats</a>
                     </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="/nano/adminnano.php">🛠️ Admin Nano</a>
+                    </li>
                 </ul>
                 <ul class="navbar-nav">
                     <!-- Section Admin -->
