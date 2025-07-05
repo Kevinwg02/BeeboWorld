@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
-    header('Location: ../php/login.php.php');  // ← corrige bien le chemin
+    header('Location: /php/login.php.php');  // ← corrige bien le chemin
     exit;
 }
 
@@ -12,7 +12,7 @@ if (isset($_GET['delete'])) {
     $deleteId = (int) $_GET['delete'];
     $stmt = $pdo->prepare("DELETE FROM library WHERE ID = ?");
     $stmt->execute([$deleteId]);
-    header('Location: library.php?deleted=1');
+    header('Location: /library.php?deleted=1');
     exit;
 }
 
@@ -127,35 +127,43 @@ $localisations = $pdo->query("SELECT DISTINCT localisation FROM library WHERE lo
 
 <body class="bg-light">
     <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="../index.php">📚 Beeboworld</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <!-- Left-aligned nav items (if needed in future) -->
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="admin_book.php">🛠️ Admin</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="stats.php">📊 Stats</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="library.php">📚 Library</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="add_manual.php">➕ Ajout manuel</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link btn" data-bs-toggle="modal" data-bs-target="#pagesModal" href="#">📖 Pages lues</a>
-                    </li>
-                </ul>
-            </div>
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/index.php">📚 Beeboworld</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <!-- Section Nano -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/nano/nano.php">✍️ Nano Projets</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/nano/nanoadd.php">➕ Ajouter Nano</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                <!-- Section Admin -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/private/admin_book.php">🛠️ Admin</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/private/stats.php">📊 Stats</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/private/library.php">📚 Library</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/private/add_manual.php">➕ Ajout manuel</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link btn" data-bs-toggle="modal" data-bs-target="#pagesModal" href="#">📖 Pages lues</a>
+                </li>
+            </ul>
         </div>
-    </nav>
+    </div>
+</nav>
+
 </body>
 
 <body class="bg-light">
