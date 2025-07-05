@@ -1,12 +1,11 @@
 <?php
 session_start();
 if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
-  header('Location: ../index.php');
-  exit;
+    header('Location: /php/login.php.php');  // ← corrige bien le chemin
+    exit;
 }
 
-include '../php/connexion.php';
-
+include $_SERVER['DOCUMENT_ROOT'] . '/php/connexion.php';
 // Suppression livre
 if (isset($_GET['delete'])) {
   $deleteId = (int) $_GET['delete'];
@@ -104,43 +103,46 @@ $pages_lues = $stmt_pages->fetchAll(PDO::FETCH_ASSOC);
 </head>
 
 <body class="bg-light">
-  <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="/index.php">📚 Beeboworld</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <!-- Section Nano -->
-                <li class="nav-item">
-                    <a class="nav-link" href="/nano/nano.php">✍️ Nano Projets</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/nano/nanoadd.php">➕ Ajouter Nano</a>
-                </li>
-            </ul>
-            <ul class="navbar-nav">
-                <!-- Section Admin -->
-                <li class="nav-item">
-                    <a class="nav-link" href="/private/admin_book.php">🛠️ Admin</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/private/stats.php">📊 Stats</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/private/library.php">📚 Library</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/private/add_manual.php">➕ Ajout manuel</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link btn" data-bs-toggle="modal" data-bs-target="#pagesModal" href="#">📖 Pages lues</a>
-                </li>
-            </ul>
+     <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/index.php">📚 Beeboworld</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <!-- Section Nano -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/nano/nano.php">✍️ Nano Projets</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/nano/nanoadd.php">➕ Ajouter Nano</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/nano/nanostats.php">📊 Nano Stats</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <!-- Section Admin -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/private/admin_book.php">🛠️ Admin</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/private/stats.php">📊 Stats</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/private/library.php">📚 Library</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/private/add_manual.php">➕ Ajout manuel</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn" data-bs-toggle="modal" data-bs-target="#pagesModal" href="#">📖 Pages lues</a>
+                    </li>
+                </ul>
+            </div>
         </div>
-    </div>
-</nav>
+    </nav>
 
 </body>
 

@@ -1,11 +1,6 @@
 <?php
-session_start();
-if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
-    header('Location: /php/login.php.php');  // ← corrige bien le chemin
-    exit;
-}
-
 include $_SERVER['DOCUMENT_ROOT'] . '/php/connexion.php';
+
 // Statistiques globales
 $stmt = $pdo->query("SELECT COUNT(DISTINCT projet_id) AS nb_projets, SUM(nb_mots) AS total_mots FROM nano");
 $stats = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -33,7 +28,7 @@ foreach ($projectsStats as $row) {
 // Progression mots par jour
 $stmt = $pdo->query("SELECT date_ajout, SUM(nb_mots) AS mots_ajoutes FROM nano GROUP BY date_ajout ORDER BY date_ajout ASC");
 $progressionStats = $stmt->fetchAll(PDO::FETCH_ASSOC);
-$progressDates = array_map(fn($d) => date('Y-m-d', strtotime($d)), array_column($progressionStats, 'date_ajout'));
+$progressDates = array_column($progressionStats, 'date_ajout');
 $progressMots = array_map('intval', array_column($progressionStats, 'mots_ajoutes'));
 
 // Mots ajoutés ce mois
@@ -65,49 +60,15 @@ $motsCeMois = (int) $stmt->fetchColumn();
 
 <body class="bg-light">
 
-    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="/index.php">📚 Beeboworld</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <!-- Section Nano -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="/nano/nano.php">✍️ Nano Projets</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/nano/nanoadd.php">➕ Ajouter Nano</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/nano/nanostats.php">📊 Nano Stats</a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    <!-- Section Admin -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="/private/admin_book.php">🛠️ Admin</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/private/stats.php">📊 Stats</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/private/library.php">📚 Library</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/private/add_manual.php">➕ Ajout manuel</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link btn" data-bs-toggle="modal" data-bs-target="#pagesModal" href="#">📖 Pages lues</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+
     <div class="container py-4">
         <h1 class="mb-4 text-center">📊 Statistiques d’écriture</h1>
-
+        <div class="container py-4">
+            <a href="/index.php" class="btn btn-primary mb-2">📚 Library</a>
+            <a href="/public/public_stats.php" class="btn btn-warning mb-2">📊 Stats</a>
+            <a href="/public/nanopublicstats.php" class="btn btn-success mb-2">📊 Nano Stats</a>
+            <a href="/public/nanopublic.php" class="btn btn-primary mb-2">📊 Nano</a>
+        </div>
         <div class="row row-cols-1 row-cols-md-3 g-3 text-center mb-5">
             <div class="col">
                 <div class="bg-white rounded shadow-sm p-4 stat-card">
@@ -163,82 +124,79 @@ $motsCeMois = (int) $stmt->fetchColumn();
     </div>
 
     <script>
-    const ctxWords = document.getElementById('wordsChart');
-    new Chart(ctxWords, {
-        type: 'bar',
-        data: {
-            labels: <?= json_encode($labels) ?>,
-            datasets: [{
-                label: 'Mots écrits',
-                data: <?= json_encode($dataWords) ?>,
-                backgroundColor: 'rgba(54, 162, 235, 0.7)'
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Projet'
-                    }
-                },
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Nombre de mots'
-                    }
-                }
-            }
-        }
-    });
-
-    const ctxProgress = document.getElementById('progressChart');
-    new Chart(ctxProgress, {
-        type: 'line',
-        data: {
-            labels: <?= json_encode($progressDates) ?>,
-            datasets: [{
-                label: 'Progression quotidienne',
-                data: <?= json_encode($progressMots) ?>,
-                borderColor: 'rgba(75, 192, 192, 0.8)',
-                backgroundColor: 'rgba(75, 192, 192, 0.3)',
-                fill: true,
-                tension: 0.3
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                x: {
-                    type: 'time',
-                    time: {
-                        unit: 'day',
-                        displayFormats: {
-                            day: 'dd/MM'
+        new Chart(document.getElementById('wordsChart'), {
+            type: 'bar',
+            data: {
+                labels: <?= json_encode($labels) ?>,
+                datasets: [{
+                    label: 'Mots écrits',
+                    data: <?= json_encode($dataWords) ?>,
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Projet'
                         }
                     },
-                    title: {
-                        display: true,
-                        text: 'Date'
-                    }
-                },
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Mots ajoutés'
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Nombre de mots'
+                        }
                     }
                 }
             }
-        }
-    });
-</script>
+        });
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
+        new Chart(document.getElementById('progressChart'), {
+            type: 'line',
+            data: {
+                labels: <?= json_encode($progressDates) ?>,
+                datasets: [{
+                    label: 'Mots écrits par jour',
+                    data: <?= json_encode($progressMots) ?>,
+                    borderColor: 'rgba(255, 99, 132, 0.8)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.3)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            parser: 'yyyy-MM-dd',
+                            unit: 'day',
+                            displayFormats: {
+                                day: 'dd MMM'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Nombre de mots'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

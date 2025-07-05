@@ -1,15 +1,31 @@
 <?php
+session_start();
+if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
+    header('Location: /index.php');  // ← corrige bien le chemin
+    exit;
+}
+
 include $_SERVER['DOCUMENT_ROOT'] . '/php/connexion.php';
-
-
-// On récupère la liste des projets avec leur ID et nom
-$stmt = $pdo->query("SELECT id, nom FROM projets ORDER BY nom ASC");
+// Récupère tous les projets avec infos de base
+$stmt = $pdo->query("SELECT id, nom, couverture, date_debut, date_fin, etat, resume FROM projets ORDER BY nom ASC");
 $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
-?>
 
+// Pour chaque projet, on ajoute ses thèmes
+foreach ($projects as &$projet) {
+    $stmtThemes = $pdo->prepare("
+        SELECT t.nom 
+        FROM themes t 
+        JOIN projets_themes pt ON pt.theme_id = t.id 
+        WHERE pt.projet_id = ?
+        ORDER BY t.nom
+    ");
+    $stmtThemes->execute([$projet['id']]);
+    $projet['themes'] = $stmtThemes->fetchAll(PDO::FETCH_COLUMN);
+}
+unset($projet); // bonne pratique pour éviter les effets de bord
+?>
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
     <meta charset="UTF-8">
     <title>Mes projets</title>
@@ -22,9 +38,8 @@ $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
     </style>
 </head>
-
 <body class="bg-light">
-  <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+<nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
     <div class="container-fluid">
         <a class="navbar-brand" href="/index.php">📚 Beeboworld</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -32,68 +47,71 @@ $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <!-- Section Nano -->
-                <li class="nav-item">
-                    <a class="nav-link" href="/nano/nano.php">✍️ Nano Projets</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/nano/nanoadd.php">➕ Ajouter Nano</a>
-                </li>
+                <li class="nav-item"><a class="nav-link" href="/nano/nano.php">✍️ Nano Projets</a></li>
+                <li class="nav-item"><a class="nav-link" href="/nano/nanoadd.php">➕ Ajouter Nano</a></li>
+                <li class="nav-item"><a class="nav-link" href="/nano/nanostats.php">📊 Nano Stats</a></li>
             </ul>
             <ul class="navbar-nav">
-                <!-- Section Admin -->
-                <li class="nav-item">
-                    <a class="nav-link" href="/private/admin_book.php">🛠️ Admin</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/private/stats.php">📊 Stats</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/private/library.php">📚 Library</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/private/add_manual.php">➕ Ajout manuel</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link btn" data-bs-toggle="modal" data-bs-target="#pagesModal" href="#">📖 Pages lues</a>
-                </li>
+                <li class="nav-item"><a class="nav-link" href="/private/admin_book.php">🛠️ Admin</a></li>
+                <li class="nav-item"><a class="nav-link" href="/private/stats.php">📊 Stats</a></li>
+                <li class="nav-item"><a class="nav-link" href="/private/library.php">📚 Library</a></li>
+                <li class="nav-item"><a class="nav-link" href="/private/add_manual.php">➕ Ajout manuel</a></li>
+                <li class="nav-item"><a class="nav-link btn" data-bs-toggle="modal" data-bs-target="#pagesModal" href="#">📖 Pages lues</a></li>
             </ul>
         </div>
     </div>
 </nav>
 
+<div class="container py-5">
+    <h1 class="mb-5 text-center">🗂️ Mes projets</h1>
 
-    <div class="container py-5">
-        <h1 class="mb-5 text-center">🗂️ Mes projets</h1>
+    <?php if (empty($projects)): ?>
+        <div class="alert alert-info text-center">Aucun projet enregistré.</div>
+    <?php else: ?>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            <?php foreach ($projects as $projet): ?>
+                <?php
+                // Total mots pour le projet
+                $stmt = $pdo->prepare("SELECT SUM(nb_mots) FROM nano WHERE projet_id = ?");
+                $stmt->execute([$projet['id']]);
+                $total = $stmt->fetchColumn() ?: 0;
+                ?>
+                <div class="col">
+                    <div class="card project-card h-100 border-0 bg-white shadow-sm">
+                        <?php if (!empty($projet['couverture'])): ?>
+                            <img src="<?= htmlspecialchars($projet['couverture']) ?>" class="card-img-top" style="max-height: 200px; object-fit: cover;" alt="Couverture">
+                        <?php endif; ?>
+                        <div class="card-body">
+                            <h5 class="card-title"><?= htmlspecialchars($projet['nom']) ?></h5>
+                            <p class="text-muted mb-1"><?= $total ?> mots au total</p>
+                            <p class="mb-1">
+                                <strong>Thèmes :</strong>
+                                <?php if (!empty($projet['themes'])): ?>
+                                    <span class="badge bg-secondary me-1"><?= implode('</span> <span class="badge bg-secondary me-1">', array_map('htmlspecialchars', $projet['themes'])) ?></span>
+                                <?php else: ?>
+                                    <span class="text-muted">Aucun</span>
+                                <?php endif; ?>
+                            </p>
+                            <p class="mb-1"><strong>Dates :</strong> <?= htmlspecialchars($projet['date_debut']) ?> → <?= htmlspecialchars($projet['date_fin']) ?></p>
+                            <p class="mb-1"><strong>État :</strong> <?= htmlspecialchars($projet['etat']) ?></p>
 
-        <?php if (empty($projects)): ?>
-            <div class="alert alert-info text-center">Aucun projet enregistré.</div>
-        <?php else: ?>
-            <div class="row row-cols-1 row-cols-md-3 g-4">
-                <?php foreach ($projects as $projet): ?>
-                    <?php
-                    // Récupérer le total des mots pour ce projet
-                    $stmt = $pdo->prepare("SELECT SUM(nb_mots) as total_mots FROM nano WHERE projet_id = ?");
-                    $stmt->execute([$projet['id']]);
-                    $total = $stmt->fetchColumn() ?: 0;
-                    ?>
-                    <div class="col">
-                        <a href="nanoproject.php?projet_id=<?= $projet['id'] ?>" class="text-decoration-none">
-                            <div class="card project-card h-100 border-0 bg-white shadow-sm">
-                                <div class="card-body text-center">
-                                    <h5 class="card-title mb-2"><?= htmlspecialchars($projet['nom']) ?></h5>
-                                    <p class="text-muted"><?= $total ?> mots au total</p>
-                                    <span class="badge bg-primary">Voir le contenu</span>
-                                </div>
+                            <button class="btn btn-sm btn-outline-secondary mt-2" type="button" data-bs-toggle="collapse" data-bs-target="#resume<?= $projet['id'] ?>">
+                                📖 Voir le résumé
+                            </button>
+                            <a href="nanoproject.php?projet_id=<?= $projet['id'] ?>" class="btn btn-sm btn-primary mt-2">🔎 Voir le projet</a>
+
+                            <div class="collapse mt-2" id="resume<?= $projet['id'] ?>">
+                                <p class="small"><?= nl2br(htmlspecialchars($projet['resume'])) ?></p>
                             </div>
-                        </a>
+                        </div>
                     </div>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+</div>
 
-    <!-- Modal Ajout Pages Lues -->
+<!-- Modal Pages lues -->
 <div class="modal fade" id="pagesModal" tabindex="-1" aria-labelledby="pagesModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <form method="POST" action="pages_lu.php" class="modal-content">
@@ -117,7 +135,7 @@ $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </form>
     </div>
 </div>
-</body>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>

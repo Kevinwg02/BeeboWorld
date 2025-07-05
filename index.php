@@ -1,5 +1,5 @@
 <?php
-include 'php/connexion.php';
+include $_SERVER['DOCUMENT_ROOT'] . '/php/connexion.php';
 
 // Récupération des filtres
 $search = $_GET['search'] ?? '';
@@ -160,10 +160,11 @@ $localisations = $pdo->query("SELECT DISTINCT localisation FROM library WHERE lo
             <a href="<?= strtok($_SERVER["REQUEST_URI"], '?') ?>" class="btn btn-outline-secondary">Réinitialiser</a>
         </form>
 
-        <div class="mb-3">
-            <a href="public/public_stats.php" class="btn btn-warning mb-2">📊 Stats</a>
+        <div class="container py-4">
+            <a href="/index.php" class="btn btn-primary mb-2">📚 Library</a>
+            <a href="/public/public_stats.php" class="btn btn-warning mb-2">📊 Stats</a>
+            <a href="/public/nanopublicstats.php" class="btn btn-success mb-2">📊 Nano Stats</a>
         </div>
-
         <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
             <?php if ($books): ?>
                 <?php foreach ($books as $book): ?>

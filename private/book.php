@@ -1,11 +1,11 @@
 <?php
 session_start();
 if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
-    header('Location: ../index.php');  // ← corrige bien le chemin
+    header('Location: /php/login.php.php');  // ← corrige bien le chemin
     exit;
 }
 
-include '../php/connexion.php';
+include $_SERVER['DOCUMENT_ROOT'] . '/php/connexion.php';
 
 // Suppression
 if (isset($_GET['delete'])) {

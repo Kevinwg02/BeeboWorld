@@ -1,12 +1,11 @@
 <?php
 session_start();
 if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
-    header('Location: ../index.php');
+    header('Location: /php/login.php.php');  // ← corrige bien le chemin
     exit;
 }
 
-include '../php/connexion.php';
-
+include $_SERVER['DOCUMENT_ROOT'] . '/php/connexion.php';
 $annee = $_GET['annee'] ?? null;
 $mois = $_GET['mois'] ?? null;
 $pages_lues = [];

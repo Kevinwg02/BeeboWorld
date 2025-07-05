@@ -4,8 +4,7 @@
 //     header('Location: ../index.php');
 //     exit;
 // }
-
-include '../php/connexion.php';
+include $_SERVER['DOCUMENT_ROOT'] . '/php/connexion.php';
 
 setlocale(LC_TIME, 'fr_FR.UTF-8', 'fra', 'fr_FR', 'fr', 'French_France.1252');
 $annee_actuelle = date('Y');
@@ -35,7 +34,8 @@ $stmt = $pdo->query("SELECT SUM(Prix) FROM library WHERE Prix IS NOT NULL AND lo
 $prix_total = $stmt->fetchColumn();
 
 // Format mois
-function formatMois($annee, $mois) {
+function formatMois($annee, $mois)
+{
     return sprintf("%02d-%s", $mois, $annee);
 }
 
@@ -58,7 +58,8 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     $lectures_par_mois[$row['mois']] = (int)$row['count'];
 }
 
-function regrouperParAnnee($data) {
+function regrouperParAnnee($data)
+{
     $result = [];
     foreach ($data as $mois => $count) {
         list($annee, $moisNum) = explode('-', $mois);
@@ -91,6 +92,7 @@ foreach ($all_months as $m) {
 
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <title>Statistiques bibliothèque</title>
@@ -98,13 +100,16 @@ foreach ($all_months as $m) {
     <link rel="shortcut icon" href="../assets/favicon.ico">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-light">
-    
-    <div class="container py-4">
-        <div class="mb-3">
-            <a href="../index.php" class="btn btn-warning mb-2">📚 Library</a>
-        </div>
 
+<body class="bg-light">
+
+    <div class="container py-4">
+        <a href="/index.php" class="btn btn-primary mb-2">📚 Library</a>
+        <a href="/public/public_stats.php" class="btn btn-warning mb-2">📊 Stats</a>
+        <a href="/public/nanopublicstats.php" class="btn btn-success mb-2">📊 Nano Stats</a>
+        <a href="/public/nanopublic.php" class="btn btn-primary mb-2">📊 Nano</a>
+    </div>
+    <div class="container py-4">
         <h1>Statistiques de la bibliothèque</h1>
         <div class="row row-cols-1 row-cols-md-5 g-3 text-center mb-4">
             <div class="col">
@@ -185,17 +190,17 @@ foreach ($all_months as $m) {
             </div>
 
             <div class="col-md-12">
-            <h2>Pages lues par année</h2>
-            <ul class="list-group mb-3">
-                <?php foreach ($pages_par_annee as $annee => $moisArray): ?>
-                    <li class="list-group-item">
-                        <a href="public_pages_lues_mois.php?annee=<?= urlencode($annee) ?>">
-                            <?= htmlspecialchars($annee) ?>
-                        </a>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
-        </div>
+                <h2>Pages lues par année</h2>
+                <ul class="list-group mb-3">
+                    <?php foreach ($pages_par_annee as $annee => $moisArray): ?>
+                        <li class="list-group-item">
+                            <a href="public_pages_lues_mois.php?annee=<?= urlencode($annee) ?>">
+                                <?= htmlspecialchars($annee) ?>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
         </div>
 
         <a href="../index.php" class="btn btn-primary mt-3">⬅ Retour à la bibliothèque</a>
@@ -211,16 +216,38 @@ foreach ($all_months as $m) {
             type: 'bar',
             data: {
                 labels: labels,
-                datasets: [
-                    { label: 'Livres achetés', data: dataAchats, backgroundColor: 'rgba(0, 248, 74, 0.7)' },
-                    { label: 'Livres lus', data: dataLectures, backgroundColor: 'rgba(0, 195, 255, 0.7)' }
+                datasets: [{
+                        label: 'Livres achetés',
+                        data: dataAchats,
+                        backgroundColor: 'rgba(0, 248, 74, 0.7)'
+                    },
+                    {
+                        label: 'Livres lus',
+                        data: dataLectures,
+                        backgroundColor: 'rgba(0, 195, 255, 0.7)'
+                    }
                 ]
             },
             options: {
                 responsive: true,
                 scales: {
-                    y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 }, title: { display: true, text: 'Nombre de livres' }},
-                    x: { title: { display: true, text: 'Mois' }}
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            precision: 0
+                        },
+                        title: {
+                            display: true,
+                            text: 'Nombre de livres'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Mois'
+                        }
+                    }
                 }
             }
         });
@@ -231,18 +258,46 @@ foreach ($all_months as $m) {
         new Chart(ctxPages, {
             type: 'line',
             data: {
-                labels: labels,
-                datasets: [{ label: 'Pages lues', data: dataPages, backgroundColor: 'rgba(153, 102, 255, 0.6)' }]
+                labels: labels, // supposé être des dates ou des mois
+                datasets: [{
+                    label: 'Pages lues',
+                    data: dataPages,
+                    borderColor: 'rgba(54, 162, 235, 0.8)', // bleu doux
+                    backgroundColor: 'rgba(54, 162, 235, 0.3)', // bleu fond
+                    fill: true,
+                    tension: 0.3 // courbe douce
+                }]
             },
             options: {
                 responsive: true,
                 scales: {
-                    y: { beginAtZero: true, title: { display: true, text: 'Nombre de pages' }},
-                    x: { title: { display: true, text: 'Mois' }}
+                    x: {
+                        x: {
+                            type: 'category',
+                            title: {
+                                display: true,
+                                text: 'Mois'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Mois'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Nombre de pages'
+                        }
+                    }
                 }
             }
         });
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
+
 </body>
+
 </html>

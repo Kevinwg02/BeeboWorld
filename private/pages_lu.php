@@ -1,5 +1,11 @@
 <?php
-include '../php/connexion.php';
+session_start();
+if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
+    header('Location: /php/login.php.php');  // ← corrige bien le chemin
+    exit;
+}
+
+include $_SERVER['DOCUMENT_ROOT'] . '/php/connexion.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $date = $_POST['date'] ?? null;

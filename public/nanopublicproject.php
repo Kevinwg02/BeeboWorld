@@ -1,9 +1,5 @@
 <?php
-session_start();
-if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
-    header('Location: /index.php');  // ← corrige bien le chemin
-    exit;
-}
+
 
 include $_SERVER['DOCUMENT_ROOT'] . '/php/connexion.php';
 
@@ -38,37 +34,18 @@ sort($chapitres);
 </head>
 
 <body class="bg-light">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="/index.php">📚 Beeboworld</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link" href="/nano/nano.php">✍️ Nano Projets</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/nano/nanoadd.php">➕ Ajouter Nano</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/nano/nanostats.php">📊 Nano Stats</a></li>
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item"><a class="nav-link" href="/private/admin_book.php">🛠️ Admin</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/private/stats.php">📊 Stats</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/private/library.php">📚 Library</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/private/add_manual.php">➕ Ajout manuel</a></li>
-                    <li class="nav-item"><a class="nav-link btn" data-bs-toggle="modal" data-bs-target="#pagesModal" href="#">📖 Pages lues</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
+    <div class="container py-4">
+        <a href="/index.php" class="btn btn-primary mb-2">📚 Library</a>
+        <a href="/public/public_stats.php" class="btn btn-warning mb-2">📊 Stats</a>
+        <a href="/public/nanopublicstats.php" class="btn btn-success mb-2">📊 Nano Stats</a>
+          <a href="/public/nanopublic.php" class="btn btn-primary mb-2">📊 Nano</a>
+    </div>
     <div class="container py-5">
 
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1 class="mb-0"><?= htmlspecialchars($projet) ?></h1>
             <div>
-                <a href="nanoadd.php?projet_id=<?= $projet_id ?>" class="btn btn-sm btn-primary mt-2">📘 Ajout Projet</a>
-
-                <a href="nano.php" class="btn btn-sm btn-secondary mt-2">← Retour</a>
+                <a href="/public/nanopublic.php" class="btn btn-sm btn-secondary mt-2">← Retour</a>
             </div>
         </div>
 
@@ -96,7 +73,7 @@ sort($chapitres);
                                 <div>
                                     📅 <?= htmlspecialchars($entry['date_ajout']) ?> — ✍️ <?= (int)$entry['nb_mots'] ?> mots
                                 </div>
-                                <a href="nanoedit.php?id=<?= $entry['id'] ?>" class="btn btn-sm btn-warning mt-1">✏️ Modifier</a>
+                                
                             </div>
 
                             <h4 class="text-center fw-bold mb-3"><?= htmlspecialchars($entry['chapitre']) ?></h4>

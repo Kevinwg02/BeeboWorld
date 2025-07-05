@@ -5,7 +5,7 @@
 //     exit;
 // }
 
-include '../php/connexion.php';
+include $_SERVER['DOCUMENT_ROOT'] . '/php/connexion.php';
 
 
 $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
@@ -59,143 +59,146 @@ if (!$book) {
 
 <body class="bg-light">
     <div class="container py-4">
-        <a href="../index.php" class="btn btn-warning mb-3">📚 Library</a>
-        <h1 class="mb-4"><?= htmlspecialchars($book['Titre']) ?></h1>
-        <div class="row">
-            <!-- Couverture -->
-            <div class="col-md-4">
+        <a href="/index.php" class="btn btn-primary mb-2">📚 Library</a>
+        <a href="/public/public_stats.php" class="btn btn-warning mb-2">📊 Stats</a>
+        <a href="/public/nanopublicstats.php" class="btn btn-success mb-2">📊 Nano Stats</a>
+  
+    <h1 class="mb-4"><?= htmlspecialchars($book['Titre']) ?></h1>
+    <div class="row">
+        <!-- Couverture -->
+        <div class="col-md-4">
+            <?php
+            $cover = $book['Couverture'] ?: "https://covers.openlibrary.org/b/isbn/" . preg_replace('/[^0-9Xx]/', '', $book['ISBN']) . "-L.jpg";
+            ?>
+            <img src="<?= htmlspecialchars($cover) ?>" alt="Couverture" class="img-fluid shadow-sm rounded">
+        </div>
+
+        <!-- Infos -->
+        <div class="col-md-8">
+            <div class="row">
                 <?php
-                $cover = $book['Couverture'] ?: "https://covers.openlibrary.org/b/isbn/" . preg_replace('/[^0-9Xx]/', '', $book['ISBN']) . "-L.jpg";
+                $fields = [
+                    "Auteur",
+                    "ISBN",
+                    "Date_achat",
+                    "Prix",
+                    "Date_lecture",
+                    "Dedicace",
+                    "Maison_edition",
+                    "Goodies",
+                    "Format",
+                    "Marquepages",
+                    "Nombre_pages",
+                    "Relecture",
+                    "Genre",
+                    "Notation",
+                    "Couple",
+                    "Themes",
+                    "localisation",
+                ];
+                $fieldLabels = [
+                    "Auteur" => "Auteur",
+                    "ISBN" => "ISBN",
+                    "Date_achat" => "Date d'achat",
+                    "Prix" => "Prix (€)",
+                    "Date_lecture" => "Date de lecture",
+                    "Dedicace" => "Dédicace",
+                    "Maison_edition" => "Maison d'édition",
+                    "Goodies" => "Goodies",
+                    "Format" => "Format",
+                    "Marquepages" => "Marque-pages",
+                    "Nombre_pages" => "Nombre de pages",
+                    "Relecture" => "Relecture",
+                    "Genre" => "Genre",
+                    "Notation" => "Notation",
+                    "Couple" => "Couple",
+                    "Themes" => "Thèmes",
+                    "localisation" => "Emplacement dans la bibliothèque"
+                ];
+                foreach ($fields as $field):
+                    // Ignorer les champs qui seront affichés dans la section "Livre lu"
+                    if (!empty($book['Date_lecture']) && in_array($field, ['Date_lecture', 'Notation', 'Relecture'])) {
+                        continue;
+                    }
+
+                    $value = $book[$field] ?? '';
+
+                    // Reformater la date au format français uniquement pour les champs de date
+                    if (in_array($field, ['Date_achat', 'Date_lecture', 'Relecture']) && !empty($value) && $value !== '0000-00-00') {
+                        $date = DateTime::createFromFormat('Y-m-d', $value);
+                        if ($date) {
+                            $value = $date->format('d-m-Y'); // format JJ-MM-AAAA
+                        }
+                    }
                 ?>
-                <img src="<?= htmlspecialchars($cover) ?>" alt="Couverture" class="img-fluid shadow-sm rounded">
-            </div>
+                    <div class="col-md-6 detail-row">
+                        <span class="label"><?= htmlspecialchars($fieldLabels[$field] ?? $field) ?> :</span><br>
+                        <span class="value"><?= nl2br(htmlspecialchars($value)) ?></span>
+                    </div>
+                <?php endforeach; ?>
+                <?php if (!empty($book['Date_lecture']) && $book['Date_lecture'] !== '0000-00-00'): ?>
+                    <div class="mt-4 p-3 bg-success bg-opacity-10 border border-success rounded">
+                        <h5 class="text-success mb-3">📖 Ce livre a été lu</h5>
+                        <div class="row">
+                            <?php
+                            // Date de lecture
+                            $dateLecture = DateTime::createFromFormat('Y-m-d', $book['Date_lecture']);
+                            echo "<div class='col-md-6 detail-row'><span class='label'>Date de lecture :</span><br><span class='value'>" . $dateLecture->format('d-m-Y') . "</span></div>";
 
-            <!-- Infos -->
-            <div class="col-md-8">
-                <div class="row">
-                    <?php
-                    $fields = [
-                        "Auteur",
-                        "ISBN",
-                        "Date_achat",
-                        "Prix",
-                        "Date_lecture",
-                        "Dedicace",
-                        "Maison_edition",
-                        "Goodies",
-                        "Format",
-                        "Marquepages",
-                        "Nombre_pages",
-                        "Relecture",
-                        "Genre",
-                        "Notation",
-                        "Couple",
-                        "Themes",
-                        "localisation",
-                    ];
-                    $fieldLabels = [
-                        "Auteur" => "Auteur",
-                        "ISBN" => "ISBN",
-                        "Date_achat" => "Date d'achat",
-                        "Prix" => "Prix (€)",
-                        "Date_lecture" => "Date de lecture",
-                        "Dedicace" => "Dédicace",
-                        "Maison_edition" => "Maison d'édition",
-                        "Goodies" => "Goodies",
-                        "Format" => "Format",
-                        "Marquepages" => "Marque-pages",
-                        "Nombre_pages" => "Nombre de pages",
-                        "Relecture" => "Relecture",
-                        "Genre" => "Genre",
-                        "Notation" => "Notation",
-                        "Couple" => "Couple",
-                        "Themes" => "Thèmes",
-                        "localisation" => "Emplacement dans la bibliothèque"
-                    ];
-                    foreach ($fields as $field):
-                        // Ignorer les champs qui seront affichés dans la section "Livre lu"
-                        if (!empty($book['Date_lecture']) && in_array($field, ['Date_lecture', 'Notation', 'Relecture'])) {
-                            continue;
-                        }
-
-                        $value = $book[$field] ?? '';
-
-                        // Reformater la date au format français uniquement pour les champs de date
-                        if (in_array($field, ['Date_achat', 'Date_lecture', 'Relecture']) && !empty($value) && $value !== '0000-00-00') {
-                            $date = DateTime::createFromFormat('Y-m-d', $value);
-                            if ($date) {
-                                $value = $date->format('d-m-Y'); // format JJ-MM-AAAA
+                            // Notation
+                            if (!empty($book['Notation'])) {
+                                echo "<div class='col-md-6 detail-row'><span class='label'>Notation :</span><br><span class='value'>" . htmlspecialchars($book['Notation']) . "</span></div>";
                             }
-                        }
-                    ?>
-                        <div class="col-md-6 detail-row">
-                            <span class="label"><?= htmlspecialchars($fieldLabels[$field] ?? $field) ?> :</span><br>
-                            <span class="value"><?= nl2br(htmlspecialchars($value)) ?></span>
+
+                            // Relecture
+                            if (!empty($book['Relecture']) && $book['Relecture'] !== '0000-00-00') {
+                                $dateRelecture = DateTime::createFromFormat('Y-m-d', $book['Relecture']);
+                                echo "<div class='col-md-6 detail-row'><span class='label'>Relecture :</span><br><span class='value'>" . $dateRelecture->format('d-m-Y') . "</span></div>";
+                            }
+
+                            // Couple
+                            if (!empty($book['Couple'])) {
+                                echo "<div class='col-md-6 detail-row'><span class='label'>Couple :</span><br><span class='value'>" . htmlspecialchars($book['Couple']) . "</span></div>";
+                            }
+
+                            // Chronique écrite
+                            if (!empty($book['Chronique_ecrite'])) {
+                                echo "<div class='col-md-6 detail-row'><span class='label'>Chronique écrite :</span><br><span class='value'>" . htmlspecialchars($book['Chronique_ecrite']) . "</span></div>";
+                            }
+
+                            // Chronique publiée
+                            if (!empty($book['Chronique_publiee'])) {
+                                echo "<div class='col-md-6 detail-row'><span class='label'>Chronique publiée :</span><br><span class='value'>" . htmlspecialchars($book['Chronique_publiee']) . "</span></div>";
+                            }
+
+                            // Affichage de la chronique si elle est écrite + publiée + non vide
+                            if (
+                                !empty($book['Chronique']) &&
+                                strtolower($book['Chronique_ecrite']) === 'oui' &&
+                                strtolower($book['Chronique_publiee']) !== 'non'
+                            )
+                            ?>
                         </div>
-                    <?php endforeach; ?>
-                    <?php if (!empty($book['Date_lecture']) && $book['Date_lecture'] !== '0000-00-00'): ?>
-                        <div class="mt-4 p-3 bg-success bg-opacity-10 border border-success rounded">
-                            <h5 class="text-success mb-3">📖 Ce livre a été lu</h5>
-                            <div class="row">
-                                <?php
-                                // Date de lecture
-                                $dateLecture = DateTime::createFromFormat('Y-m-d', $book['Date_lecture']);
-                                echo "<div class='col-md-6 detail-row'><span class='label'>Date de lecture :</span><br><span class='value'>" . $dateLecture->format('d-m-Y') . "</span></div>";
-
-                                // Notation
-                                if (!empty($book['Notation'])) {
-                                    echo "<div class='col-md-6 detail-row'><span class='label'>Notation :</span><br><span class='value'>" . htmlspecialchars($book['Notation']) . "</span></div>";
-                                }
-
-                                // Relecture
-                                if (!empty($book['Relecture']) && $book['Relecture'] !== '0000-00-00') {
-                                    $dateRelecture = DateTime::createFromFormat('Y-m-d', $book['Relecture']);
-                                    echo "<div class='col-md-6 detail-row'><span class='label'>Relecture :</span><br><span class='value'>" . $dateRelecture->format('d-m-Y') . "</span></div>";
-                                }
-
-                                // Couple
-                                if (!empty($book['Couple'])) {
-                                    echo "<div class='col-md-6 detail-row'><span class='label'>Couple :</span><br><span class='value'>" . htmlspecialchars($book['Couple']) . "</span></div>";
-                                }
-
-                                // Chronique écrite
-                                if (!empty($book['Chronique_ecrite'])) {
-                                    echo "<div class='col-md-6 detail-row'><span class='label'>Chronique écrite :</span><br><span class='value'>" . htmlspecialchars($book['Chronique_ecrite']) . "</span></div>";
-                                }
-
-                                // Chronique publiée
-                                if (!empty($book['Chronique_publiee'])) {
-                                    echo "<div class='col-md-6 detail-row'><span class='label'>Chronique publiée :</span><br><span class='value'>" . htmlspecialchars($book['Chronique_publiee']) . "</span></div>";
-                                }
-
-                                // Affichage de la chronique si elle est écrite + publiée + non vide
-                                if (
-                                    !empty($book['Chronique']) &&
-                                    strtolower($book['Chronique_ecrite']) === 'oui' &&
-                                    strtolower($book['Chronique_publiee']) !== 'non'
-                                )
-                                ?>
-                            </div>
-                        </div>
-                    <?php endif; ?>
+                    </div>
+                <?php endif; ?>
 
 
 
-                </div>
             </div>
         </div>
+    </div>
 
-        <!-- Détails & Chronique -->
-        <div class="mt-5">
-            <div class="section-title">📝 Résumé</div>
-            <p><?= nl2br(htmlspecialchars($book['Details'])) ?></p>
+    <!-- Détails & Chronique -->
+    <div class="mt-5">
+        <div class="section-title">📝 Résumé</div>
+        <p><?= nl2br(htmlspecialchars($book['Details'])) ?></p>
 
-            <div class="section-title">📖 Chronique</div>
-            <p><?= nl2br(htmlspecialchars($book['Chronique'])) ?></p>
+        <div class="section-title">📖 Chronique</div>
+        <p><?= nl2br(htmlspecialchars($book['Chronique'])) ?></p>
 
-            <div class="section-title">📖 Citation</div>
-            <p><?= nl2br(htmlspecialchars($book['Citation'])) ?></p>
-        </div>
+        <div class="section-title">📖 Citation</div>
+        <p><?= nl2br(htmlspecialchars($book['Citation'])) ?></p>
+    </div>
     </div>
 </body>
 

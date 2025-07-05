@@ -1,11 +1,11 @@
 <?php
 session_start();
 if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
-    header('Location: ../index.php');  // ← corrige bien le chemin
+    header('Location: /index.php');  // ← corrige bien le chemin
     exit;
 }
 
-include '../php/connexion.php';
+include $_SERVER['DOCUMENT_ROOT'] . '/php/connexion.php';
 
 // Statistiques globales avec filtre "bibliotheque"
 setlocale(LC_TIME, 'fr_FR.UTF-8', 'fra', 'fr_FR', 'fr', 'French_France.1252');
@@ -116,43 +116,46 @@ foreach ($all_months as $m) {
 </head>
 
 <body class="bg-light">
-<nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="/index.php">📚 Beeboworld</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <!-- Section Nano -->
-                <li class="nav-item">
-                    <a class="nav-link" href="/nano/nano.php">✍️ Nano Projets</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/nano/nanoadd.php">➕ Ajouter Nano</a>
-                </li>
-            </ul>
-            <ul class="navbar-nav">
-                <!-- Section Admin -->
-                <li class="nav-item">
-                    <a class="nav-link" href="/private/admin_book.php">🛠️ Admin</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/private/stats.php">📊 Stats</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/private/library.php">📚 Library</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/private/add_manual.php">➕ Ajout manuel</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link btn" data-bs-toggle="modal" data-bs-target="#pagesModal" href="#">📖 Pages lues</a>
-                </li>
-            </ul>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/index.php">📚 Beeboworld</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <!-- Section Nano -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/nano/nano.php">✍️ Nano Projets</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/nano/nanoadd.php">➕ Ajouter Nano</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/nano/nanostats.php">📊 Nano Stats</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <!-- Section Admin -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/private/admin_book.php">🛠️ Admin</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/private/stats.php">📊 Stats</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/private/library.php">📚 Library</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/private/add_manual.php">➕ Ajout manuel</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn" data-bs-toggle="modal" data-bs-target="#pagesModal" href="#">📖 Pages lues</a>
+                    </li>
+                </ul>
+            </div>
         </div>
-    </div>
-</nav>
+    </nav>
 
 
 </body>
@@ -189,7 +192,7 @@ foreach ($all_months as $m) {
         </div>
         <div class="col">
             <div class="bg-white rounded shadow-sm p-3">
-                <h5 class="text-muted">Valeur de la bibliothèque</h5>
+                <h5 class="text-muted">Valeur bibliothèque</h5>
                 <h3 class="text-danger"><?= number_format($prix_total, 2, ',', ' ') ?> €</h3>
             </div>
         </div>
@@ -360,33 +363,39 @@ foreach ($all_months as $m) {
     new Chart(ctxPages, {
         type: 'line',
         data: {
-            labels: labelsPages,
+            labels: labels, // supposé être des dates ou des mois
             datasets: [{
                 label: 'Pages lues',
                 data: dataPages,
-                backgroundColor: 'rgba(153, 102, 255, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 0.8)', // bleu doux
+                backgroundColor: 'rgba(54, 162, 235, 0.3)', // bleu fond
+                fill: true,
+                tension: 0.3 // courbe douce
             }]
         },
         options: {
             responsive: true,
             scales: {
+                x: {
+                    x: {
+                        type: 'category',
+                        title: {
+                            display: true,
+                            text: 'Mois'
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Mois'
+                    }
+                },
                 y: {
                     beginAtZero: true,
                     title: {
                         display: true,
                         text: 'Nombre de pages'
                     }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Mois'
-                    }
                 }
-            },
-            interaction: {
-                mode: 'library',
-                intersect: false
             }
         }
     });
@@ -394,7 +403,8 @@ foreach ($all_months as $m) {
     console.log('Max livres lus:', Math.max(...dataLectures));
     console.log('Nb pages lus:', Math.max(...dataPages));
 </script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
 </body>
 
 </html>
